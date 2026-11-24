@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Таиланд и BTS: маршрут</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: phone-first travel companion — sticky day strip on top, schematic map, then a stack of stop cards; second tab for memos. */
+:root{
+  /* Ticket-and-night palette: plum ink, temple gold, concert violet */
+  --bg:#F2F0F6;
+  --surface:#FFFFFF;
+  --ink:#211A33;
+  --muted:#675F7C;
+  --line:#DCD6E6;
+  --accent:#B9800F;
+  --accent-ink:#FFFFFF;
+  --green:#1E7A57;
+  --concert:#7A4BD8;
+  --warn:#BF431B;
+  --chip:#E7E2F0;
+  --land:#EEEBF3;
+  --water:#B3D2E8;
+  --road-m:#D99A3A;
+  --road-p:#EDC27A;
+  --road-s:#D6D0DF;
+  --ticket:#2A1F45;
+  --ticket-ink:#F6F1E4;
+  --meal:#C44A6A; --road-case:#D3CCDD; --road-w:#FFFFFF; --rail-bts:#2F6FB5; --rail-mrt:#2F6FB5; --rail-mono:#D9A400; --rail-rail:#B5473A;
+  --font-display:"Unbounded", "Golos Text", system-ui, sans-serif;
+  --font-body:"Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#120E1C; --surface:#1C1629; --ink:#ECE8F4; --muted:#A39BB8; --line:#2F2741;
+    --accent:#E0AE48; --accent-ink:#1A1408; --green:#4CC08E; --concert:#A88BF5; --warn:#F08A62; --chip:#271F37; --land:#1A1526; --water:#1E3550; --road-m:#9A6E2C; --road-p:#6B5634; --road-s:#352D45; --ticket:#2B2145; --ticket-ink:#F6F1E4; --meal:#E77C98; --road-case:#120E1C; --road-w:#3A3150; --rail-bts:#6FA0E6; --rail-mrt:#6FA0E6; --rail-mono:#E8C547; --rail-rail:#E0786B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#120E1C; --surface:#1C1629; --ink:#ECE8F4; --muted:#A39BB8; --line:#2F2741;
+    --accent:#E0AE48; --accent-ink:#1A1408; --green:#4CC08E; --concert:#A88BF5; --warn:#F08A62; --chip:#271F37; --land:#1A1526; --water:#1E3550; --road-m:#9A6E2C; --road-p:#6B5634; --road-s:#352D45; --ticket:#2B2145; --ticket-ink:#F6F1E4; --meal:#E77C98; --road-case:#120E1C; --road-w:#3A3150; --rail-bts:#6FA0E6; --rail-mrt:#6FA0E6; --rail-mono:#E8C547; --rail-rail:#E0786B;
+    color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5}
+a{color:inherit}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 64px}
+
+header.top h1{font-family:var(--font-display);font-weight:700;font-size:clamp(22px,5vw,30px);line-height:1.15;margin:0;text-wrap:balance}
+header.top .sub{color:var(--muted);font-size:14px}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;font-variant-numeric:tabular-nums}
+.stat b{font-weight:600}
+
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 8px;display:grid;gap:10px;border-bottom:1px solid var(--line)}
+.seg{display:inline-flex;background:var(--chip);border-radius:12px;padding:3px;gap:3px;width:max-content}
+.seg button{border:0;background:transparent;padding:7px 16px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.day-chip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 10px;cursor:pointer;text-align:left;min-width:62px;display:grid;gap:0}
+.day-chip .d{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.day-chip .w{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.day-chip.concert{border-color:var(--concert)}
+.day-chip.concert .w{color:var(--concert)}
+.day-chip[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.day-chip[aria-current="true"] .w{color:inherit;opacity:.75}
+.day-chip .bar{height:3px;border-radius:2px;background:var(--line);margin-top:4px;overflow:hidden}
+.day-chip .bar i{display:block;height:100%;background:var(--green)}
+
+.notice{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--chip);color:var(--muted);font-size:13px}
+.notice.hidden{display:none}
+
+section.dayhead{padding:18px 0 6px;display:grid;gap:6px}
+.dayhead .when{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--muted)}
+.pill.concert{background:var(--concert);color:#fff}
+.pill.city{background:transparent;border:1px solid var(--line)}
+.dayhead h2{font-family:var(--font-display);font-weight:600;font-size:clamp(19px,4.2vw,24px);margin:0;line-height:1.2;text-wrap:balance}
+.dayhead p{margin:0;color:var(--muted);max-width:65ch}
+
+.mapcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px;margin-top:12px}
+.mapcard svg{display:block;width:100%;height:auto}
+.mapfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 4px 2px;font-size:12px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:hover{filter:brightness(.97)}
+
+.stops{display:grid;gap:12px;margin-top:14px}
+.stop{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:grid;grid-template-columns:96px 1fr}
+.stop.done{border-color:var(--green)}
+.cover{position:relative;min-height:100%;display:grid;place-items:center}
+.cover svg{width:44px;height:44px}
+.cover .num{position:absolute;top:8px;left:8px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.stop.done .cover .num{background:var(--green);color:#fff}
+.body{padding:12px 14px;display:grid;gap:6px;min-width:0}
+.row1{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.time{font-size:12px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.area{font-size:12px;color:var(--muted)}
+.stop h3{margin:0;font-size:17px;line-height:1.25;font-weight:700}
+.stop .desc{margin:0;font-size:14px;max-width:65ch}
+.stop .tip{margin:0;font-size:13px;color:var(--muted);border-left:3px solid var(--accent);padding-left:8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.check{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface)}
+.check[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.check .box{width:16px;height:16px;border-radius:4px;border:2px solid currentColor;display:grid;place-items:center;font-size:11px;line-height:1}
+.note{width:100%;min-height:40px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);font-size:14px}
+.note::placeholder{color:var(--muted)}
+.saved{font-size:11px;color:var(--muted);min-height:14px}
+.photos{display:flex;gap:6px;flex-wrap:wrap}
+.photos img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;background:var(--chip)}
+.addphoto{width:72px;height:72px;border-radius:8px;border:1px dashed var(--line);display:grid;place-items:center;font-size:11px;color:var(--muted);cursor:pointer;text-align:center;padding:4px;background:transparent}
+.addphoto input{display:none}
+
+.extras h3{font-family:var(--font-display);font-size:16px;font-weight:600;margin:28px 0 4px}
+.extras p{margin:0 0 10px;color:var(--muted);font-size:14px}
+.idea{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.idea + .idea{margin-top:8px}
+.idea .t{font-weight:600;font-size:14px}
+.idea .s{font-size:13px;color:var(--muted)}
+.idea .grow{flex:1;min-width:0}
+
+/* memos */
+.memo{display:grid;gap:14px;padding-top:16px}
+.mcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.mcard.alert{border-left:4px solid var(--warn)}
+.mcard h2{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0 0 8px}
+.mcard ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px;max-width:65ch}
+.mcard p{margin:0 0 8px;font-size:14px;max-width:65ch}
+.flights{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.flights th,.flights td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.flights th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.tablewrap{overflow-x:auto}
+.cl{display:grid;gap:8px}
+.cl label{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
+.cl input{width:18px;height:18px;margin-top:2px;accent-color:var(--green)}
+.cl .when{color:var(--muted);font-size:12px}
+
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:20;padding:16px}
+.lightbox.open{display:grid}
+.lightbox img{max-width:100%;max-height:85vh;border-radius:10px}
+.lightbox button{position:absolute;top:12px;right:12px}
+
+.stop.has-photo{grid-template-columns:1fr}
+.cover.photo{height:190px;min-height:0;display:block;padding:0!important}
+.cover.photo img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.cover.photo .num{z-index:1}
+.credit{font-size:11px;color:var(--muted)}
+.credit a{color:var(--muted)}
+.fee{font-size:13px;font-weight:600;padding:5px 10px;border-radius:8px;width:fit-content;max-width:100%}
+.fee-free{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green)}
+.fee-ticket{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--ink)}
+.fee-spend{background:var(--chip);color:var(--ink)}
+.fee-tour{background:color-mix(in srgb,var(--concert) 14%,transparent);color:var(--ink)}
+.daycost{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;width:fit-content}
+.rmap{position:relative;border-radius:12px;overflow:hidden;touch-action:none;background:var(--land)}
+.rmap canvas{display:block;width:100%;height:100%;cursor:grab}
+.rmap canvas:active{cursor:grabbing}
+.rmap-ctl{position:absolute;right:8px;top:8px;display:grid;gap:6px}
+.rmap-ctl .btn{width:36px;height:36px;justify-content:center;padding:0;font-size:18px}
+.rmap-attr{position:absolute;left:6px;bottom:4px;font-size:10px;color:var(--muted);background:color-mix(in srgb,var(--surface) 80%,transparent);padding:1px 6px;border-radius:6px}
+.rmap-load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:13px;color:var(--muted);background:var(--surface);padding:6px 10px;border-radius:8px;border:1px solid var(--line)}
+
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.btn.sos{border-color:var(--warn);color:var(--warn)}
+.today{margin-top:14px;background:var(--ink);color:var(--bg);border-radius:16px;padding:12px 14px;display:grid;gap:8px}
+.today .t-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.75}
+.today .t-row{display:grid;gap:2px}
+.today .t-row b{font-size:17px}
+.today .t-row span{font-size:13px;opacity:.8}
+.today .btn{background:transparent;color:var(--bg);border-color:color-mix(in srgb,var(--bg) 40%,transparent)}
+.today .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.hours{font-size:12.5px;color:var(--muted)}
+.hours.closed{color:#fff;background:var(--warn);padding:5px 10px;border-radius:8px;font-weight:700;width:fit-content}
+.hours.check{color:var(--warn);font-weight:600}
+.driver{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.6);display:none;place-items:center;padding:16px}
+.driver.open{display:grid}
+.dr-card{background:#fff;color:#111;border-radius:20px;padding:22px 20px;max-width:560px;width:100%;display:grid;gap:10px;text-align:center}
+.dr-hint{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#666}
+.dr-please{font-size:22px;font-weight:600}
+.dr-th{font-size:clamp(30px,8vw,46px);font-weight:700;line-height:1.25;word-break:break-word}
+.dr-extra{font-size:18px;line-height:1.4}
+.dr-ru{font-size:14px;color:#555}
+.dr-card .actions{justify-content:center}
+.dr-card .btn{background:#f1f1f1;color:#111;border-color:#ddd}
+.dr-card .btn.primary{background:#C98A12;color:#fff;border-color:#C98A12}
+.sbox{padding-top:16px;display:grid;gap:10px}
+.sbox input{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.slist{display:grid;gap:8px;margin-top:12px}
+.srow{display:grid;grid-template-columns:64px 1fr;gap:10px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;width:100%}
+.srow .s-day{font-size:12px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.srow .s-main{display:grid;gap:2px;min-width:0}
+.srow .s-main span{font-size:12.5px;color:var(--muted)}
+.srow .s-main .s-bad{color:var(--warn);font-weight:600}
+.idea-row{cursor:default}
+.empty{color:var(--muted)}
+.sos-card{border-left:4px solid var(--warn)}
+.sos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px}
+.sos-grid div{background:var(--bg);border-radius:10px;padding:8px 10px;display:grid}
+.sos-grid b{font-size:24px;font-variant-numeric:tabular-nums}
+.sos-grid span{font-size:12.5px;color:var(--muted)}
+.phr{display:grid;gap:6px}
+.phr-row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;cursor:pointer}
+.phr-row .p-ru{font-weight:600;font-size:14px}
+.phr-row .p-th{font-size:18px;grid-row:span 2;align-self:center}
+.phr-row .p-tr{font-size:12px;color:var(--muted)}
+
+header.top{padding:16px 0 10px;display:grid;gap:10px}
+.ticket{position:relative;background:var(--ticket);color:var(--ticket-ink);border-radius:20px;padding:18px 18px 14px;display:grid;gap:10px;overflow:hidden}
+.t-perf{position:relative}
+.t-perf::before,.t-perf::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:var(--bg);top:-12px}
+.t-perf::before{left:-33px}.t-perf::after{right:-33px}
+.t-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:10px}
+.t-leg{display:grid;gap:2px}
+.t-leg.right{text-align:right}
+.t-city{font-family:var(--font-display);font-weight:700;font-size:clamp(22px,6.4vw,34px);line-height:1;letter-spacing:-.01em}
+.t-dates{font-size:13px;opacity:.75;font-variant-numeric:tabular-nums}
+.t-plane{width:48px;height:24px;color:var(--accent);margin-bottom:14px}
+.t-concert{font-size:13.5px;line-height:1.4;color:color-mix(in srgb,var(--ticket-ink) 85%,var(--concert))}
+.t-perf{height:0;border-top:2px dashed color-mix(in srgb,var(--ticket-ink) 28%,transparent);margin:2px 4px 0}
+.ticket .stats{margin-top:0}
+.ticket .stat{background:color-mix(in srgb,var(--ticket-ink) 10%,transparent);border-color:color-mix(in srgb,var(--ticket-ink) 18%,transparent);color:var(--ticket-ink)}
+.day-chip{position:relative;border-radius:10px;padding:7px 12px 6px;min-width:64px;
+  -webkit-mask:radial-gradient(circle 5px at 0 50%,transparent 4.5px,#000 5px) left/51% 100% no-repeat,radial-gradient(circle 5px at 100% 50%,transparent 4.5px,#000 5px) right/51% 100% no-repeat;
+  mask:radial-gradient(circle 5px at 0 50%,transparent 4.5px,#000 5px) left/51% 100% no-repeat,radial-gradient(circle 5px at 100% 50%,transparent 4.5px,#000 5px) right/51% 100% no-repeat}
+.day-chip .w{text-transform:none;letter-spacing:0;font-size:12px}
+.day-chip.concert{background:var(--concert);border-color:var(--concert);color:#fff}
+.day-chip.concert .w{color:#fff;opacity:.85}
+.day-chip.concert[aria-current="true"]{background:var(--concert);border-color:var(--concert);color:#fff;box-shadow:inset 0 0 0 2px var(--ink),inset 0 -5px 0 var(--ink)}
+.pill,.today .t-lbl,.dr-hint{text-transform:none!important;letter-spacing:0!important}
+.pill{font-size:12px}
+.today{background:var(--ticket);color:var(--ticket-ink)}
+.today .btn{color:var(--ticket-ink);border-color:color-mix(in srgb,var(--ticket-ink) 35%,transparent)}
+.check .box{transition:none}
+.dayhead h2{font-weight:700}
+@media (prefers-reduced-motion: reduce){.ticket,.day-chip{animation:none}}
+
+/* timeline */
+.timeline{margin-top:18px;display:grid}
+.tl{display:grid;grid-template-columns:62px 30px 1fr;column-gap:10px;position:relative}
+.tl-time{font-size:12.5px;font-weight:700;color:var(--accent);text-align:right;padding-top:5px;font-variant-numeric:tabular-nums;line-height:1.3;overflow-wrap:anywhere}
+.tl-rail{position:relative;display:flex;justify-content:center}
+.tl-rail::before{content:"";position:absolute;top:30px;bottom:0;left:50%;border-left:2px dashed var(--line);transform:translateX(-1px)}
+.tl.last .tl-rail::before{display:none}
+.tl-num{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.tl.done .tl-num{background:var(--green);color:#fff}
+.tl-body{position:relative;padding-bottom:30px;display:grid;gap:8px;min-width:0}
+.tl-photo{margin:0;border-radius:14px;overflow:hidden;background:var(--chip);position:relative}
+.tl-photo img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;cursor:zoom-in}
+.tl-photo figcaption{font-size:11px;color:var(--muted);padding:5px 2px 0;background:var(--bg)}
+.tl-photo figcaption a{color:var(--muted)}
+.tl-head h3{margin:0;font-family:var(--font-display);font-weight:600;font-size:17px;line-height:1.25;text-wrap:balance}
+.tl-area{font-size:13px;color:var(--muted);margin-top:2px}
+.tl-desc{margin:0;font-size:14.5px;line-height:1.5;max-width:62ch}
+.facts{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.facts li{display:flex;gap:7px;align-items:flex-start;font-size:13px;color:var(--muted);line-height:1.4}
+.facts svg{width:16px;height:16px;flex:0 0 16px;margin-top:1px}
+.facts .f-good{color:var(--green)}
+.facts .f-warn{color:var(--accent);font-weight:600}
+.facts .f-bad{color:#fff;background:var(--warn);border-radius:8px;padding:4px 8px;font-weight:700;width:fit-content}
+.tl-tip{margin:0;font-size:13px;color:var(--ink);border-left:3px solid var(--accent);padding:2px 0 2px 9px;max-width:62ch}
+.tl-actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px}
+.tl-actions .check{border-radius:999px;padding:7px 14px;font-size:13px}
+.tl-actions .check[aria-pressed="true"]{background:transparent;color:var(--muted);border-color:var(--line)}
+.lnk{border:0;background:none;padding:6px 0;font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;cursor:pointer}
+.lnk:hover{text-decoration-color:var(--accent)}
+.tl .note{background:transparent;border-style:dashed}
+.stamp{position:absolute;right:4px;top:6px;z-index:2;display:grid;justify-items:center;padding:6px 12px;border:3px double var(--green);border-radius:10px;color:var(--green);font-family:var(--font-display);font-weight:700;font-size:18px;line-height:1;transform:rotate(-9deg);background:color-mix(in srgb,var(--surface) 70%,transparent);pointer-events:none}
+.stamp small{font-size:11px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+.tl-photo + .tl-head{margin-top:2px}
+.tl.has-photo .stamp,.tl-body:has(.tl-photo) .stamp{top:14px;right:14px}
+/* concert lights */
+.lights{position:relative;height:132px;margin-top:16px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#140C26 0%,#2A1650 100%)}
+.lights canvas{position:absolute;inset:0;width:100%;height:100%}
+.lights-txt{position:absolute;left:16px;bottom:12px;display:grid;color:#F6F1E4;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.lights-txt b{font-family:var(--font-display);font-size:20px}
+.lights-txt span{font-size:12.5px;opacity:.85}
+/* collapsible map */
+.mapcard .rmap{height:250px;transition:height .35s ease}
+.mapcard.open .rmap{height:min(480px,68vh)}
+.rmap.full{position:fixed;inset:0;z-index:60;height:100dvh!important;border-radius:0}
+.rmap-close[hidden]{display:none}
+.rmap-close{position:absolute;left:10px;top:10px;z-index:2;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.rmap-ctl .btn svg{display:block}
+.rmap-pop{position:absolute;left:10px;right:58px;bottom:26px;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 8px 28px rgba(20,10,40,.22);display:grid;gap:6px;z-index:2}
+.rmap-pop[hidden]{display:none}
+.pop-x{position:absolute;right:6px;top:4px;border:0;background:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:4px 8px}
+.pop-h{display:flex;gap:10px;align-items:center;padding-right:24px}
+.pop-h b{display:block;font-size:15px;line-height:1.25}
+.pop-h small{color:var(--muted);font-size:12.5px}
+.pop-n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:13px}
+.pop-n.done{background:var(--green);color:#fff}
+.pop-leg,.pop-fee{font-size:12.5px;color:var(--muted)}
+.pop-leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.pop-act{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.pop-act .btn{font-size:13px;padding:6px 10px}
+.maplegend{display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 4px 2px;font-size:12px;color:var(--muted)}
+.maplegend span{display:inline-flex;align-items:center;gap:6px}
+.maplegend i{display:inline-block;width:18px;height:0;border-top:3px solid currentColor}
+.maplegend i.dash{border-top-style:dashed}
+.maplegend i.dot{border-top-style:dotted}
+.maplegend i.pin{width:12px;height:12px;border:0;border-radius:50%;background:var(--ink)}
+.maplegend i.home{width:12px;height:12px;border:0;border-radius:3px;background:var(--ink)}
+.maplegend i.st{width:9px;height:9px;border:2px solid var(--ink);border-radius:50%;background:var(--surface)}
+.maphint{font-size:12px;color:var(--muted);padding:2px 4px 0}
+.tl.flash .tl-body{animation:flash 1.6s ease}
+@keyframes flash{0%,40%{background:color-mix(in srgb,var(--accent) 16%,transparent)}100%{background:transparent}}
+@media (prefers-reduced-motion: reduce){.tl.flash .tl-body{animation:none}}
+.mapfoot{padding:8px 2px 2px}
+/* bottom bar */
+.bottombar{display:none}
+@media (max-width:700px){
+  .bottombar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  .bottombar button{border:0;background:none;display:grid;justify-items:center;gap:2px;padding:4px 0;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer}
+  .bottombar svg{width:22px;height:22px}
+  .bottombar button[aria-current="true"]{color:var(--ink)}
+  .bottombar button[aria-current="true"] svg{color:var(--accent)}
+  .bottombar .bb-sos{color:var(--warn)}
+  .wrap{padding-bottom:96px}
+  nav.tabs .seg{display:none}
+  #qSos{display:none}
+  .tl{grid-template-columns:44px 28px 1fr;column-gap:8px}
+  .tl-time{font-size:11.5px}
+}
+@media (prefers-reduced-motion: reduce){.mapcard .rmap{transition:none}}
+
+.leg{display:grid;grid-template-columns:62px 30px 1fr;column-gap:10px}
+.leg-rail{position:relative;display:flex;justify-content:center}
+.leg-rail::before{content:"";position:absolute;top:0;bottom:0;left:50%;border-left:2px dashed var(--line);transform:translateX(-1px)}
+.leg-dot{position:relative;z-index:1;width:10px;height:10px;border-radius:50%;margin-top:8px;box-shadow:0 0 0 3px var(--bg)}
+.leg-body{padding:4px 0 22px;display:grid;gap:2px}
+.leg-main{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:13px;align-items:baseline}
+.leg-main span{color:var(--ink);font-variant-numeric:tabular-nums}
+.leg-txt{font-size:12.5px;color:var(--muted);max-width:60ch}
+.tl-body{padding-bottom:22px}
+dl.daycost{display:grid;grid-template-columns:repeat(3,auto);gap:4px 18px;margin:2px 0 0;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;width:fit-content;max-width:100%}
+dl.daycost div{display:grid}
+dl.daycost dt{font-size:12px;color:var(--muted)}
+dl.daycost dd{margin:0;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+dl.daycost .tot dd{color:var(--accent)}
+.dc-note{font-size:12px!important;color:var(--muted)}
+@media (max-width:700px){ .leg{grid-template-columns:44px 28px 1fr;column-gap:8px} dl.daycost{grid-template-columns:1fr 1fr} dl.daycost .tot{grid-column:1/-1} }
+.meal-dot{background:var(--meal);border-radius:3px;transform:rotate(45deg)}
+.meal-slot{color:var(--meal)}
+dl.daycost{grid-template-columns:repeat(4,auto)}
+@media (max-width:700px){ dl.daycost{grid-template-columns:1fr 1fr} }
+.m-grid{fill:var(--line)}.m-route{fill:none;stroke:var(--accent)}.m-base{fill:var(--surface);stroke:var(--ink)}.m-muted{fill:var(--muted)}.m-ink{stroke:var(--ink)}.m-dot{fill:var(--ink)}.m-done{fill:var(--green)}.m-dott{fill:var(--bg)}.m-donet{fill:#fff}
+@media (max-width:420px){
+  .stop{grid-template-columns:1fr}
+  .cover{min-height:64px;grid-template-columns:auto;justify-items:end;padding-right:12px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* ================= Design system v2 =================
+   Night-ticket identity: aubergine ink, violet as the single interactive colour,
+   warm gold only for money and time. 4-pt spacing, three radii, one elevation. */
+:root{
+  --bg:#F5F3F8; --surface:#FFFFFF; --surface-2:#F0EDF5; --ink:#18132A; --ink-2:#4A4360; --muted:#7A7390;
+  --line:#E7E2EF; --line-strong:#D5CDE2;
+  --accent:#6A47DB; --accent-ink:#FFFFFF; --accent-soft:#EFEAFD; --gold:#A8771E;
+  --green:#1D8457; --green-soft:#E6F4EC; --warn:#C2410C; --warn-soft:#FDEEE6;
+  --concert:#6A47DB; --chip:#EEEAF4;
+  --ticket:#1E1735; --ticket-2:#2C2250; --ticket-ink:#F5F1FF;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s7:32px; --s8:40px;
+  --r-sm:10px; --r-md:14px; --r-lg:20px;
+  --sh-1:0 1px 2px rgba(24,19,42,.04),0 6px 20px -10px rgba(24,19,42,.16);
+  --sh-2:0 2px 6px rgba(24,19,42,.06),0 18px 40px -16px rgba(24,19,42,.28);
+  --t-xs:12px; --t-sm:13px; --t-md:15px; --t-lg:17px; --t-xl:20px; --t-2xl:24px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F0C18; --surface:#181425; --surface-2:#211C31; --ink:#F1EEF8; --ink-2:#C9C2DA; --muted:#8F88A6;
+  --line:#2A2440; --line-strong:#3A3354; --accent:#9C85FF; --accent-ink:#140F24; --accent-soft:#272046; --gold:#E2B25A;
+  --green:#4CC48E; --green-soft:#16291F; --warn:#F2875C; --warn-soft:#2E1A14; --concert:#9C85FF; --chip:#221C33;
+  --ticket:#1F1838; --ticket-2:#2E2456;
+  --sh-1:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); --sh-2:0 18px 40px -12px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --bg:#0F0C18; --surface:#181425; --surface-2:#211C31; --ink:#F1EEF8; --ink-2:#C9C2DA; --muted:#8F88A6;
+  --line:#2A2440; --line-strong:#3A3354; --accent:#9C85FF; --accent-ink:#140F24; --accent-soft:#272046; --gold:#E2B25A;
+  --green:#4CC48E; --green-soft:#16291F; --warn:#F2875C; --warn-soft:#2E1A14; --concert:#9C85FF; --chip:#221C33;
+  --ticket:#1F1838; --ticket-2:#2E2456;
+  --sh-1:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); --sh-2:0 18px 40px -12px rgba(0,0,0,.7);
+}
+html,body{font-size:var(--t-md);line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{-webkit-tap-highlight-color:transparent}
+.wrap{max-width:720px;padding:0 var(--s4) var(--s8)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* buttons */
+.btn{min-height:40px;padding:0 var(--s4);border-radius:12px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font-size:14px;font-weight:600;gap:var(--s2);justify-content:center;transition:background-color .15s,border-color .15s,transform .1s}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:active{transform:scale(.98)}
+@media (hover:hover){ .btn:hover{filter:none;background:var(--surface-2)} .btn.primary:hover{background:color-mix(in srgb,var(--accent) 88%,#000)} }
+.btn.sos{border-color:color-mix(in srgb,var(--warn) 40%,transparent);color:var(--warn);background:var(--surface)}
+.lnk{font-size:14px;color:var(--ink-2);text-decoration:none;padding:var(--s2) 0;border-radius:6px}
+@media (hover:hover){ .lnk:hover{color:var(--accent)} }
+
+/* header ticket */
+header.top{padding:var(--s4) 0 var(--s3);gap:var(--s3)}
+.ticket{background:radial-gradient(120% 140% at 100% 0%,var(--ticket-2) 0%,var(--ticket) 60%);border-radius:24px;padding:var(--s5) var(--s5) var(--s4);gap:var(--s3);box-shadow:var(--sh-2)}
+.t-city{font-size:clamp(24px,7vw,34px);font-weight:700;letter-spacing:-.02em}
+.t-dates{font-size:var(--t-sm);opacity:.7;margin-top:var(--s1)}
+.t-plane{color:#D9B36A}
+.t-concert{font-size:var(--t-sm);color:color-mix(in srgb,var(--ticket-ink) 78%,transparent);line-height:1.45}
+.t-perf{margin:var(--s1) 0 0;border-top:1.5px dashed color-mix(in srgb,var(--ticket-ink) 22%,transparent)}
+.t-perf::before,.t-perf::after{width:20px;height:20px;top:-11px}
+.t-perf::before{left:-30px}.t-perf::after{right:-30px}
+.ticket .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3);margin:0}
+.ticket .stat{background:none;border:0;padding:0;border-radius:0;display:grid;gap:2px;color:color-mix(in srgb,var(--ticket-ink) 65%,transparent);font-size:var(--t-xs);line-height:1.3}
+.ticket .stat b{order:-1;font-size:var(--t-xl);font-weight:700;color:var(--ticket-ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.quick .btn{width:100%}
+@media (max-width:700px){ .quick{grid-template-columns:1fr} }
+
+/* sticky nav */
+nav.tabs{top:0;padding:var(--s3) 0;gap:var(--s3);border-bottom:0;background:color-mix(in srgb,var(--bg) 86%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);margin:0 calc(-1 * var(--s4));padding-inline:var(--s4)}
+nav.tabs::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line)}
+.seg{background:var(--surface-2);border-radius:12px;padding:3px}
+.seg button{padding:8px 18px;border-radius:9px;font-size:14px}
+.seg button[aria-selected="true"]{background:var(--surface);box-shadow:0 1px 2px rgba(24,19,42,.1),0 0 0 1px var(--line)}
+.days{gap:var(--s2);padding:2px 0 2px;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:var(--s4)}
+.days::-webkit-scrollbar{display:none}
+.day-chip{-webkit-mask:none;mask:none;scroll-snap-align:start;min-width:64px;padding:var(--s2) var(--s3);border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);display:grid;gap:1px;transition:background-color .15s,border-color .15s}
+.day-chip .w{font-size:var(--t-xs);color:var(--muted)}
+.day-chip .d{font-size:var(--t-md);font-weight:600}
+.day-chip .bar{height:3px;margin-top:6px;background:var(--surface-2)}
+.day-chip.concert{background:var(--surface);color:var(--ink);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.day-chip.concert .w{color:var(--accent);opacity:1;font-weight:600}
+.day-chip[aria-current="true"],.day-chip.concert[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg);box-shadow:none}
+.day-chip[aria-current="true"] .w{color:color-mix(in srgb,var(--bg) 70%,transparent)}
+.day-chip.concert[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.day-chip.concert[aria-current="true"] .w{color:color-mix(in srgb,var(--accent-ink) 80%,transparent)}
+@media (hover:hover){ .day-chip:not([aria-current="true"]):hover{border-color:var(--line-strong)} }
+
+.notice{margin:var(--s3) 0 0;padding:0;background:none;font-size:var(--t-xs);color:var(--muted);display:flex;gap:6px;align-items:center}
+.notice::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--muted);flex:none}
+
+/* today banner */
+.today{margin-top:var(--s4);background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--sh-1);border-radius:var(--r-lg);padding:var(--s4);gap:var(--s3)}
+.today .t-lbl{font-size:var(--t-xs);color:var(--accent);opacity:1;font-weight:600}
+.today .t-row b{font-size:var(--t-lg)}
+.today .t-row span{opacity:1;color:var(--muted)}
+.today .btn{color:var(--ink);border-color:var(--line-strong);background:var(--surface)}
+.today .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* concert hero */
+.lights{height:148px;margin-top:var(--s5);border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+.lights-txt{left:var(--s5);bottom:var(--s4);gap:2px}
+.lights-txt b{font-size:22px;letter-spacing:-.01em}
+
+/* day head */
+section.dayhead{padding:var(--s6) 0 var(--s2);gap:var(--s2)}
+.dayhead .when{font-size:var(--t-sm);gap:var(--s2);color:var(--muted)}
+.pill{font-size:var(--t-xs);font-weight:600;padding:3px 10px;background:var(--surface-2);color:var(--ink-2)}
+.pill.city{border:0;background:var(--surface-2)}
+.pill.concert{background:var(--accent-soft);color:var(--accent)}
+.dayhead h2{font-size:clamp(22px,5.4vw,28px);font-weight:700;letter-spacing:-.015em;line-height:1.18}
+.dayhead p{font-size:var(--t-md);color:var(--ink-2);line-height:1.55}
+dl.daycost{margin-top:var(--s3);width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:0;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-1);overflow:hidden}
+dl.daycost div{padding:var(--s3) var(--s4);gap:2px}
+dl.daycost div + div{border-left:1px solid var(--line)}
+dl.daycost dt{font-size:var(--t-xs);color:var(--muted)}
+dl.daycost dd{font-size:var(--t-md);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (max-width:700px){ dl.daycost div{padding:var(--s3)} dl.daycost dd{font-size:14px} }
+dl.daycost .tot{background:var(--surface-2)}
+dl.daycost .tot dd{color:var(--gold);font-weight:700}
+.dc-note{margin:var(--s2) 0 0!important}
+@media (max-width:700px){
+  dl.daycost{grid-template-columns:1fr 1fr 1fr}
+  dl.daycost .tot{grid-column:1/-1;border-left:0!important;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+  dl.daycost .tot dd{font-size:var(--t-lg)}
+  dl.daycost div:nth-child(1){border-left:0}
+}
+
+/* map card */
+.mapcard{margin-top:var(--s5);padding:0;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-1)}
+.mapcard .rmap{border-radius:0}
+.maplegend{padding:var(--s3) var(--s4) 0;gap:6px var(--s4)}
+.maphint{padding:var(--s2) var(--s4) 0;font-size:var(--t-xs)}
+.mapfoot{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);padding:var(--s3) var(--s4) var(--s4)}
+.mapfoot .btn{width:100%}
+.rmap-ctl{right:var(--s3);top:var(--s3);gap:var(--s2)}
+.rmap-ctl .btn{width:40px;height:40px;min-height:40px;padding:0;border-radius:12px;border-color:var(--line);box-shadow:var(--sh-1);background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.rmap-pop{border-radius:var(--r-lg);padding:var(--s4);box-shadow:var(--sh-2);gap:var(--s2);left:var(--s3);bottom:var(--s6)}
+.rmap-attr{font-size:10px;left:var(--s3);bottom:var(--s2)}
+
+/* timeline */
+.timeline{margin-top:var(--s6)}
+.tl,.leg{grid-template-columns:52px 28px 1fr;column-gap:var(--s3)}
+.tl{padding-bottom:var(--s4)}
+.tl-time{font-size:var(--t-sm);font-weight:600;color:var(--gold);padding-top:var(--s1)}
+.tl-rail::before,.leg-rail::before{border-left:1.5px dashed var(--line-strong)}
+.tl-rail::before{top:28px}
+.tl-num{width:28px;height:28px;font-size:var(--t-sm);font-weight:700;box-shadow:0 0 0 4px var(--bg)}
+.tl-body{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:0 0 var(--s4);gap:var(--s3);overflow:hidden}
+.tl-body > *:not(.tl-photo):not(.stamp){margin-inline:var(--s4)}
+.tl-body > :first-child:not(.tl-photo){margin-top:var(--s4)}
+.tl-photo{border-radius:0;background:var(--surface-2)}
+.tl-photo img{aspect-ratio:16/9}
+.tl-photo figcaption{background:none;padding:var(--s2) var(--s4) 0;font-size:11px}
+.tl-head h3{font-family:var(--font-body);font-size:var(--t-lg);font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.tl-area{font-size:var(--t-sm);margin-top:2px}
+.tl-desc{font-size:var(--t-md);color:var(--ink-2);line-height:1.55}
+.facts{gap:6px}
+.facts li{font-size:var(--t-sm);color:var(--ink-2);gap:var(--s2)}
+.facts svg{color:var(--muted)}
+.facts .f-good,.facts .f-good svg{color:var(--green)}
+.facts .f-warn,.facts .f-warn svg{color:var(--warn);font-weight:500}
+.facts .f-bad{background:var(--warn-soft);color:var(--warn);border-radius:var(--r-sm);padding:6px 10px;font-weight:600}
+.facts .f-bad svg{color:var(--warn)}
+.tl-tip{border-left:0;background:var(--surface-2);border-radius:var(--r-md);padding:var(--s3) var(--s4);font-size:var(--t-sm);color:var(--ink-2);line-height:1.5}
+.tl-actions{gap:var(--s2) var(--s4);padding-top:var(--s1);border-top:1px solid var(--line);margin-top:var(--s1);padding-top:var(--s3)}
+.tl-actions .check{min-height:36px;padding:0 var(--s4);border-radius:999px;background:var(--accent-soft);color:var(--accent);border:0;font-weight:600}
+.tl-actions .check[aria-pressed="true"]{background:var(--green-soft);color:var(--green)}
+.tl .note{background:var(--surface-2);border:1px solid transparent;border-radius:var(--r-md);padding:10px 12px;font-size:14px;min-height:44px;transition:border-color .15s,background-color .15s}
+.tl .note:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.saved{margin-top:calc(-1 * var(--s2))!important}
+.saved:empty{display:none}
+.tl.done .tl-body{border-color:color-mix(in srgb,var(--green) 35%,var(--line))}
+.stamp{top:var(--s3)!important;right:var(--s3)!important;background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+/* legs & meals: quiet connectors on the rail */
+.leg-body{padding:6px 0 var(--s4);gap:2px}
+.leg-dot{width:10px;height:10px;margin-top:9px;box-shadow:0 0 0 4px var(--bg)}
+.leg-main{font-size:var(--t-sm);gap:2px var(--s3)}
+.leg-main b{font-weight:600}
+.leg-main span{color:var(--ink-2)}
+.leg-txt{font-size:var(--t-xs);color:var(--muted);line-height:1.5}
+
+/* ideas & extras */
+.extras h3{font-family:var(--font-body);font-size:var(--t-lg);font-weight:700;margin:var(--s7) 0 var(--s1)}
+.idea{border-radius:var(--r-md);padding:var(--s3) var(--s4);box-shadow:none}
+
+/* search */
+.sbox{padding-top:var(--s5);gap:var(--s3)}
+.sbox input{min-height:48px;border-radius:var(--r-md);padding:0 var(--s4);background:var(--surface);border:1px solid var(--line-strong);box-shadow:var(--sh-1)}
+.sbox input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.chip{min-height:34px;padding:0 var(--s3);font-size:var(--t-sm);border-color:var(--line);font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.slist{gap:var(--s2)}
+.srow{border-radius:var(--r-md);padding:var(--s3) var(--s4);grid-template-columns:60px 1fr;gap:var(--s3)}
+.srow .s-day{color:var(--gold);font-weight:600}
+@media (hover:hover){ .srow:hover{border-color:var(--line-strong)} }
+
+/* memos */
+.memo{gap:var(--s4);padding-top:var(--s5)}
+.mcard{border-radius:var(--r-lg);padding:var(--s5);box-shadow:var(--sh-1)}
+.mcard h2{font-family:var(--font-body);font-size:var(--t-lg);font-weight:700;letter-spacing:-.01em;margin:0 0 var(--s3)}
+.mcard ul{gap:var(--s2);font-size:14px;color:var(--ink-2);padding-left:var(--s5)}
+.mcard ul b{color:var(--ink)}
+.mcard p{font-size:14px;color:var(--ink-2)}
+.mcard.alert,.sos-card{border-left:1px solid var(--line);box-shadow:inset 4px 0 0 var(--warn),var(--sh-1)}
+.flights th{text-transform:none;letter-spacing:0;font-size:var(--t-xs)}
+.cl{gap:var(--s3)}
+.cl input{accent-color:var(--accent)}
+.sos-grid div,.phr-row{background:var(--surface-2);border-color:transparent;border-radius:var(--r-md)}
+
+/* dialogs */
+.dr-card{border-radius:24px;padding:var(--s6) var(--s5);box-shadow:var(--sh-2)}
+.dr-card .btn.primary{background:#6A47DB;border-color:#6A47DB}
+.lightbox{background:rgba(12,9,20,.9)}
+
+/* bottom bar */
+@media (max-width:700px){
+  .bottombar{background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(16px);backdrop-filter:saturate(1.4) blur(16px);border-top:1px solid var(--line);padding:6px var(--s2) calc(6px + env(safe-area-inset-bottom))}
+  .bottombar button{min-height:48px;font-size:11px;font-weight:600;gap:3px;border-radius:12px}
+  .bottombar button[aria-current="true"]{color:var(--accent)}
+  .bottombar button[aria-current="true"] svg{color:var(--accent)}
+  .bottombar .bb-sos{color:var(--warn)}
+  .wrap{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+  .tl,.leg{grid-template-columns:40px 24px 1fr;column-gap:var(--s2)}
+  .tl-time{font-size:var(--t-xs)}
+  .tl-num{width:24px;height:24px;font-size:var(--t-xs)}
+  .tl-rail::before{top:24px}
+  section.dayhead{padding-top:var(--s5)}
+}
+@media (max-width:380px){ .tl,.leg{grid-template-columns:0 24px 1fr;column-gap:var(--s2)} .tl-time{visibility:hidden} }
+
+/* ===== features v3 ===== */
+.who{margin-top:var(--s4);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:var(--s4);display:grid;gap:var(--s3)}
+.who-q{display:grid;gap:2px}.who-q b{font-size:var(--t-lg)}.who-q span{font-size:var(--t-sm);color:var(--muted)}
+.who-row{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.who.compact{box-shadow:none;border:0;padding:var(--s3) 0 0;margin-top:var(--s2);border-top:1px solid var(--line);border-radius:0;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);font-size:var(--t-sm);color:var(--muted)}
+.who.compact .chip{min-height:30px;font-size:var(--t-xs)}
+.mcard .who{margin-top:0;box-shadow:none;border:0;padding:0}
+.chip{display:inline-flex;align-items:center;justify-content:center}
+.chip[aria-pressed="false"]{background:var(--surface)}
+.now-at,.now-go{display:inline-flex;width:fit-content;font-size:var(--t-sm);font-weight:600;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.now-go{background:var(--warn-soft);color:var(--warn)}
+.now-leg{display:grid;grid-template-columns:auto 1fr;gap:2px var(--s2);align-items:baseline;font-size:var(--t-sm);color:var(--ink-2)}
+.now-leg i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.now-leg small{grid-column:2;color:var(--muted);font-size:var(--t-xs)}
+.today .actions{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.concert-plan{margin-top:var(--s4);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:var(--s5);display:grid;gap:var(--s4)}
+.concert-plan h3{margin:0;font-size:var(--t-lg);font-weight:700}
+.cp-steps{list-style:none;margin:0;padding:0;display:grid;gap:var(--s3);counter-reset:cp}
+.cp-steps li{display:grid;grid-template-columns:28px 1fr;gap:2px var(--s3);counter-increment:cp}
+.cp-steps li::before{content:counter(cp);grid-row:span 2;width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:var(--t-xs);font-weight:700}
+.cp-steps b{font-size:var(--t-md)}.cp-steps span{font-size:var(--t-sm);color:var(--ink-2)}
+.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
+.cp-grid > div{background:var(--surface-2);border-radius:var(--r-md);padding:var(--s3) var(--s4)}
+.cp-grid h4{margin:0 0 var(--s2);font-size:var(--t-sm)}
+.cp-grid ul{margin:0;padding-left:var(--s4);display:grid;gap:4px;font-size:var(--t-sm);color:var(--ink-2)}
+.cp-note{font-size:var(--t-xs)!important;color:var(--muted)!important;margin:var(--s2) 0 0!important}
+.cp-meet{display:grid;gap:6px;font-size:var(--t-sm);font-weight:600}
+input[type=text],.fld input,.cp-meet input,.conv input{min-height:46px;border-radius:var(--r-md);border:1px solid var(--line-strong);background:var(--surface);padding:0 var(--s3);font-size:16px;width:100%;font-weight:400}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+@media (max-width:560px){ .cp-grid{grid-template-columns:1fr} }
+.vote{flex:none;align-self:center;display:inline-flex;align-items:center;gap:4px;min-height:36px;min-width:44px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-weight:600;font-size:var(--t-sm);cursor:pointer}
+.vote.on{color:#D6336C;border-color:color-mix(in srgb,#D6336C 35%,var(--line));background:color-mix(in srgb,#D6336C 8%,var(--surface))}
+.vote-names{margin-top:2px}
+.idea{align-items:center}
+.phr-item{display:grid;grid-template-columns:1fr auto;gap:var(--s2);align-items:stretch}
+.phr-item .phr-row{width:100%}
+.speak{width:48px;border:0;border-radius:var(--r-md);background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;cursor:pointer}
+.speak:active{transform:scale(.96)}
+/* money */
+.conv-row{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--s2);align-items:end}
+.conv-row label,.fld{display:grid;gap:6px;font-size:var(--t-sm);font-weight:600;color:var(--ink-2)}
+.conv-row input{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;min-height:54px}
+.conv-eq{padding-bottom:14px;color:var(--muted);font-weight:600}
+.conv-q{margin-top:var(--s3)}
+.conv-rate{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3);font-size:var(--t-sm);color:var(--ink-2)}
+.conv-rate input{width:84px;min-height:38px;font-size:15px;text-align:center}
+.exp-form{display:grid;gap:var(--s4)}
+.exp-form h2{margin-bottom:0}
+.fld-row{display:grid;grid-template-columns:1fr auto;gap:var(--s3);align-items:end}
+.seg2{display:inline-flex;background:var(--surface-2);border-radius:12px;padding:3px;gap:3px}
+.seg2 button{min-width:48px;min-height:40px;border:0;border-radius:9px;background:transparent;font-size:17px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg2 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(24,19,42,.1),0 0 0 1px var(--line)}
+.exp-form .btn.primary{min-height:48px;font-size:15px}
+.form-err{margin:calc(-1*var(--s2)) 0 0!important;color:var(--warn)!important;font-size:var(--t-sm)!important}
+.bal-total{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:0 var(--s3);padding-bottom:var(--s3);border-bottom:1px solid var(--line);margin-bottom:var(--s3)}
+.bal-total span{color:var(--muted);font-size:var(--t-sm)}.bal-total b{font-size:var(--t-xl);font-variant-numeric:tabular-nums}
+.bal-total small{grid-column:2;text-align:right;color:var(--muted);font-size:var(--t-xs)}
+.bal-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.bal-grid div{background:var(--surface-2);border-radius:var(--r-md);padding:var(--s3);display:grid;gap:2px}
+.bal-grid span{font-size:var(--t-sm);color:var(--ink-2)}
+.bal-grid b{font-size:var(--t-lg);font-variant-numeric:tabular-nums}
+.bal-grid small{font-size:var(--t-xs);color:var(--muted)}
+.bal-grid .pos b{color:var(--green)}.bal-grid .neg b{color:var(--warn)}
+.settle{list-style:none;padding:0!important;margin:var(--s4) 0 0!important;display:grid;gap:var(--s2)!important}
+.settle li{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px var(--s3);padding:var(--s3) var(--s4);border-radius:var(--r-md);border:1px solid var(--line);color:var(--ink)!important}
+.settle li span{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.exp-list{display:grid}
+.exp-row{display:grid;grid-template-columns:1fr auto;gap:2px var(--s3);padding:var(--s3) 0;border-top:1px solid var(--line)}
+.exp-row:first-child{border-top:0;padding-top:0}
+.exp-main{display:grid;gap:2px;min-width:0}.exp-main b{font-size:var(--t-md);font-weight:600}.exp-main span{font-size:var(--t-xs);color:var(--muted)}
+.exp-sum{text-align:right;display:grid}.exp-sum b{font-variant-numeric:tabular-nums}.exp-sum small{font-size:var(--t-xs);color:var(--muted)}
+.exp-del{grid-column:1/-1;justify-self:start;font-size:var(--t-xs);padding:2px 0;color:var(--muted)}
+.exp-del.danger{color:var(--warn)}
+/* docs & packing */
+.doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.doc{background:var(--surface-2);border-radius:var(--r-md);padding:var(--s3) var(--s4);display:grid;gap:2px;align-content:start}
+.doc span{font-size:var(--t-xs);color:var(--muted)}.doc b{font-size:var(--t-md)}.doc small{font-size:var(--t-xs);color:var(--ink-2);line-height:1.45}
+.doc .lnk{justify-self:start;font-size:var(--t-sm);color:var(--accent);padding:var(--s1) 0 0}
+.doc-h{font-size:var(--t-md);margin:var(--s5) 0 var(--s2)}
+@media (max-width:560px){ .doc-grid{grid-template-columns:1fr} }
+.pack-sub{color:var(--muted)!important;font-size:var(--t-sm)!important}
+.pack-g{font-size:var(--t-xs);font-weight:600;color:var(--muted);margin-top:var(--s2)}
+.cl label{min-height:32px;align-items:center}
+/* overview */
+.day-chip.all{min-width:96px}
+.day-chip.all .bar{visibility:hidden}
+.ov-seg{margin-top:var(--s3);display:inline-flex}
+.ov-seg button{border:0;background:transparent;padding:8px 18px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.ov-seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(24,19,42,.1),0 0 0 1px var(--line)}
+.ov-days{margin-top:var(--s4);display:grid;gap:var(--s2)}
+.ov-day{display:grid;grid-template-columns:12px 64px 1fr;gap:var(--s3);align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s3) var(--s4);cursor:pointer;font-size:var(--t-sm)}
+.ov-day i{width:12px;height:12px;border-radius:50%}
+.ov-day span{color:var(--ink-2)}
+@media (max-width:700px){ .bottombar{grid-template-columns:repeat(5,1fr)!important} .bottombar button{font-size:10.5px} }
+</style>
+<script>
+/* Hosted / Telegram build: marks and notes are stored on this device. */
+window.__OFFLINE__=true;
+(function(){
+  var inTg=/tgWebApp/.test(location.hash+location.search)||/Telegram/i.test(navigator.userAgent);
+  if(!inTg) return;
+  var sc=document.createElement("script"); sc.src="https://telegram.org/js/telegram-web-app.js";
+  sc.onload=function(){ try{ var W=window.Telegram&&Telegram.WebApp; if(!W) return; W.ready(); W.expand();
+    var dark=W.colorScheme==="dark"; document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+    try{ W.setHeaderColor(dark?"#120E1C":"#F2F0F6"); W.setBackgroundColor(dark?"#120E1C":"#F2F0F6"); }catch(e){}
+    try{ W.disableVerticalSwipes&&W.disableVerticalSwipes(); }catch(e){} }catch(e){} };
+  document.head.appendChild(sc);
+})();
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="ticket" id="ticket">
+      <div class="t-main">
+        <div class="t-leg"><span class="t-city">Бангкок</span><span class="t-dates">28.11 – 7.12</span></div>
+        <svg class="t-plane" viewBox="0 0 48 24" aria-hidden="true"><path d="M2 12h34" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/><path d="M36 6l10 6-10 6 2-6z" fill="currentColor"/></svg>
+        <div class="t-leg right"><span class="t-city">Пхукет</span><span class="t-dates">7.12 – 11.12</span></div>
+      </div>
+      <div class="t-concert">BTS «ARIRANG» на Rajamangala, 3 и 6 декабря. Едут Наташа, Лера, Крис и Таня</div>
+      <div class="t-perf" aria-hidden="true"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="quick"><button class="btn" id="qHome"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 7.5L8 3l5.5 4.5V13a.5.5 0 01-.5.5H9.5V10h-3v3.5H3a.5.5 0 01-.5-.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Адрес жилья для таксиста</button><button class="btn sos" id="qSos"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.2l6 10.6H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3M8 11.2v.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Экстренные контакты</button></div>
+  </header>
+
+  <nav class="tabs" aria-label="Разделы">
+    <div class="seg" role="tablist">
+      <button role="tab" id="tab-route" aria-selected="true">Маршрут</button>
+      <button role="tab" id="tab-money" aria-selected="false">Деньги</button>
+      <button role="tab" id="tab-search" aria-selected="false">Поиск</button>
+      <button role="tab" id="tab-info" aria-selected="false">Памятки</button>
+    </div>
+    <div class="days" id="days" role="list"></div>
+  </nav>
+
+  <div class="notice hidden" id="syncNote"></div>
+
+  <main id="route"></main>
+  <main id="money" hidden></main>
+  <main id="search" hidden></main>
+  <main id="info" hidden></main>
+</div>
+
+<nav class="bottombar" aria-label="Разделы">
+  <button data-tab="route"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c3-6 11-2 14-12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 3"/><circle cx="5" cy="19" r="2.2" fill="currentColor"/><circle cx="19" cy="6" r="2.2" fill="currentColor"/></svg><span>Маршрут</span></button>
+  <button data-tab="money"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/><circle cx="16.5" cy="14.5" r="1.4" fill="currentColor"/></svg><span>Деньги</span></button>
+  <button data-tab="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Поиск</span></button>
+  <button data-tab="info"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Памятки</span></button>
+  <button data-tab="sos" class="bb-sos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l8.5 15H3.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9.5v4.2M12 16.3v.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>SOS</span></button>
+</nav>
+<div class="driver" id="driver" role="dialog" aria-modal="true" aria-label="Карточка для таксиста">
+  <div class="dr-card">
+    <div class="dr-hint">Покажите водителю</div>
+    <div class="dr-please">ไปที่นี่ค่ะ</div>
+    <div class="dr-th"></div>
+    <div class="dr-extra"></div>
+    <div class="dr-ru"></div>
+    <div class="actions"><button class="btn" id="drSpeak">Озвучить</button><a class="btn primary dr-map" target="_blank" rel="noopener" href="#">Открыть в Google Maps</a><button class="btn" id="drClose">Закрыть</button></div>
+  </div>
+</div>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Фото">
+  <button class="btn" id="lbClose">Закрыть</button>
+  <img id="lbImg" alt="">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
+<script>
+/* ---------- DATA ---------- */
+/* ---------- MOTION ---------- */
+const RM = (()=>{ try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } })();
+function mo(target, kf, opts){ try{ if(RM || !window.Motion || !target) return; return window.Motion.animate(target, kf, opts); }catch(e){} }
+let firstPaint=true, animDay=false, lastToggled=null, mapOpen=false;
+const stg=(t,o)=>window.Motion&&window.Motion.stagger?window.Motion.stagger(t,o):0;
+
+const HOTEL_BKK = {name:"JC Kevin Sathorn", lat:13.7176, lng:100.5318, q:"JC Kevin Sathorn Bangkok Hotel"};
+const HOME_HKT  = {name:"Дом в Кароне", lat:7.8455, lng:98.2975, q:"Karon Beach, Phuket"};
+
+const DAYS = [
+ {id:"d2811", date:"28 ноя", wd:"сб", city:"Бангкок", title:"Прилёт и заселение",
+  lead:"Рейс MU8609 из Шанхая садится в Суварнабхуми около 18:30. Вечер без планов: доехать, заселиться, поужинать рядом.", base:HOTEL_BKK,
+  stops:[
+   {id:"bkk-airport-in", name:"Аэропорт Суварнабхуми (BKK)", time:"≈18:30", area:"Прилёт", cat:"plane", lat:13.69,lng:100.7501, q:"Suvarnabhumi Airport",
+    desc:"Паспортный контроль, затем такси или Grab до отеля (40–60 минут без пробок).", tip:"Карту TDAC нужно заполнить заранее, не раньше чем за 72 часа до прилёта, то есть с 25 ноября."},
+   {id:"bkk-hotel-in", name:"Отель JC Kevin Sathorn", time:"≈20:00", area:"Сатхон", cat:"stay", lat:HOTEL_BKK.lat,lng:HOTEL_BKK.lng, q:HOTEL_BKK.q,
+    desc:"36 Naradhiwas Rajanagarindra Rd. Заезд после 14:00, номер на четверых, завтраки не включены.", tip:"На ресепшене достаточно назвать имя любой из четырёх подруг из брони."}
+  ]},
+ {id:"d2911", date:"29 ноя", wd:"вс", city:"Бангкок", title:"Сиам и Ратчапрасонг: искусство и шопинг",
+  lead:"Все точки дня в радиусе пары станций BTS. Главная точка — поп-ап BTS в 15:00.", base:HOTEL_BKK,
+  stops:[
+   {id:"bitstudio", name:"bit.studio gallery", time:"утро", area:"Самъян, Slowcombo, 3 этаж", cat:"art", lat:13.7383,lng:100.5243, q:"bit.studio gallery Slowcombo Bangkok",
+    desc:"Интерактивное цифровое искусство: свет, звук, работы можно трогать и двигать. Билеты 200–450 бат."},
+   {id:"bacc", name:"BACC", time:"до обеда", area:"Сиам", cat:"art", lat:13.7466,lng:100.5302, q:"Bangkok Art and Culture Centre",
+    desc:"Главный центр современного искусства в центре города.", tip:"Закрыт по понедельникам, поэтому стоит в воскресенье."},
+   {id:"paragon", name:"POP UP Parc Paragon — магазин BTS", time:"15:00", area:"Siam Paragon, MF", cat:"shop", lat:13.7462,lng:100.5347, q:"Siam Paragon",
+    desc:"Поп-ап BTS. В этом же ТЦ Gentle Monster и Tamburins из списка."},
+   {id:"centralworld", name:"CentralWorld", time:"после 16:00", area:"Ратчапрасонг", cat:"shop", lat:13.7466,lng:100.5393, q:"CentralWorld Bangkok",
+    desc:"Большой ТЦ в 10 минутах пешком по переходу от Paragon. Uniqlo из рилса здесь."},
+   {id:"lv-place", name:"The Place Louis Vuitton", time:"вечер", area:"Ратчапрасонг", cat:"art", lat:13.7444,lng:100.5419, q:"LV The Place Bangkok",
+    desc:"Музей бренда с кафе, по соседству с CentralWorld."},
+   {id:"stolen-sala", name:"Stolen Sala", time:"к закату", area:"Canvas Ploenchit, 7 этаж", cat:"food", lat:13.7437,lng:100.5466, q:"Stolen Sala Canvas Ploenchit",
+    desc:"Кафе на крыше над шоурумом тайского бренда Stolen Stores, напротив Central Embassy. Ради террасы на закате."},
+   {id:"mahanakhon", name:"Mahanakhon SkyWalk", time:"вечер", area:"Силом, Чонгнонси", cat:"view", lat:13.7234,lng:100.5283, q:"King Power Mahanakhon SkyWalk",
+    desc:"Смотровая со стеклянным полом. По пути обратно в отель."}
+  ]},
+ {id:"d3011", date:"30 ноя", wd:"пн", city:"Бангкок", title:"Старый город и Чайна-таун",
+  lead:"Утром храмы у реки, днём Golden Mount, вечером Чайна-таун. Последний шанс на Song Wat и Margiela.", base:HOTEL_BKK,
+  stops:[
+   {id:"grand-palace", name:"Большой дворец", time:"8:30", area:"Ратанакосин", cat:"temple", lat:13.75,lng:100.4913, q:"Grand Palace Bangkok",
+    desc:"Приезжать к открытию, пока не жарко и меньше людей.", tip:"Строгий дресс-код: закрытые плечи и колени, без обтягивающего."},
+   {id:"wat-pho", name:"Ват Пхо (Лежачий Будда)", time:"10:30", area:"Ратанакосин", cat:"temple", lat:13.7465,lng:100.493, q:"Wat Pho",
+    desc:"В 5 минутах пешком от дворца."},
+   {id:"wat-arun", name:"Ват Арун", time:"12:00", area:"Другой берег", cat:"temple", lat:13.7437,lng:100.4889, q:"Wat Arun",
+    desc:"Переправа на пароме с пристани Tha Tien, несколько минут."},
+   {id:"golden-mount", name:"Golden Mount (Wat Saket)", time:"14:30", area:"Старый город", cat:"temple", lat:13.7538,lng:100.5066, q:"Wat Saket Golden Mount",
+    desc:"Храм на холме с видом на старый город. От реки 10 минут на такси."},
+   {id:"song-wat", name:"Song Wat + Maison Margiela", time:"16:00", area:"Чайна-таун", cat:"shop", lat:13.7377,lng:100.5098, q:"Song Wat Road Bangkok",
+    desc:"Улица старых складов с кафе и магазинами.", tip:"Margiela здесь до 1 декабря, поэтому сегодня."},
+   {id:"soso", name:"soso coffee", time:"16:30", area:"Song Wat", cat:"food", lat:13.7381,lng:100.5091, q:"soso coffee Song Wat",
+    desc:"Кофе на той же улице."},
+   {id:"yaowarat", name:"Яоварат: уличная еда", time:"18:30", area:"Чайна-таун", cat:"food", lat:13.7405,lng:100.5098, q:"Yaowarat Road",
+    desc:"Главная улица Чайна-тауна, вечером превращается в ряды уличной еды. Морепродукты, как и хотели."},
+   {id:"hex-bar", name:"Hex Bar", time:"20:30", area:"Чайна-таун, Vanich 1", cat:"bar", lat:13.7398,lng:100.5075, q:"Hex Bar Bangkok",
+    desc:"Бар в стиле Гарри Поттера: дерево вверх ногами, меню-книги заклинаний, «подземелье». Бар с 18:00 до 01:00.",
+    tip:"Opium Bar над рестораном Potong (из рилса) работает только ср–вс, в понедельник закрыт."}
+  ]},
+ {id:"d0112", date:"1 дек", wd:"вт", city:"Аюттхая", title:"Аюттхая, вечером кабаре",
+  lead:"Целый день в древней столице (ЮНЕСКО), около 1,5 часа на машине от Бангкока. Вечером набережная у отеля.", base:HOTEL_BKK,
+  stops:[
+   {id:"ayutthaya", name:"Аюттхая", time:"8:00–16:00", area:"≈80 км к северу", cat:"temple", lat:14.3571,lng:100.5676, q:"Ayutthaya Historical Park",
+    desc:"Руины храмов древней столицы. Удобнее всего экскурсия или машина с водителем на день.", tip:"Шляпа, вода, удобная обувь. Плечи и колени закрыты."},
+   {id:"asiatique", name:"Asiatique + кабаре-шоу", time:"19:30", area:"Набережная", cat:"show", lat:13.7046,lng:100.5034, q:"Asiatique The Riverfront",
+    desc:"Ночной рынок у реки, недалеко от отеля. Там же кабаре-шоу: билеты лучше взять заранее."},
+   {id:"skybar", name:"Sky Bar, lebua", time:"по желанию", area:"Банграк", cat:"bar", lat:13.7215,lng:100.5168, q:"Sky Bar lebua State Tower",
+    desc:"Тот самый бар из «Мальчишника 2». Есть дресс-код, шорты и шлёпанцы не пустят."}
+  ]},
+ {id:"d0212", date:"2 дек", wd:"ср", city:"Бангкок, запад", title:"Драконий храм и Тонбури",
+  lead:"Выезд на запад: храм утром, обед и иммерсивный музей по пути назад, вечер на Chang Chui.", base:HOTEL_BKK,
+  stops:[
+   {id:"wat-samphran", name:"Wat Samphran — Драконий храм", time:"≈9:00", area:"Накхонпатхом, ≈40 км", cat:"temple", lat:13.7247,lng:100.2266, q:"Wat Samphran",
+    desc:"80-метровая башня, обвитая драконом. Открыто ежедневно 6:00–18:00, вход свободный, пожертвование по желанию.",
+    tip:"Около часа на Grab. Удобнее взять машину туда и обратно, общественный транспорт неудобен."},
+   {id:"space-time", name:"Space & Time Cube+", time:"12:30", area:"ТЦ Seacon Bangkae, цоколь", cat:"art", lat:13.7136,lng:100.4128, q:"Space & Time Cube+ Seacon Bangkae",
+    desc:"Иммерсивный музей света и инсталляций. Ежедневно 10:30–21:30, обед тут же в ТЦ."},
+   {id:"chang-chui", name:"Chang Chui Creative Park", time:"16:00–21:00", area:"Тонбури, Bang Phlat", cat:"market", lat:13.7853,lng:100.4855, q:"ChangChui Creative Park",
+    desc:"Креативный парк с самолётом, магазинами, барами и ночным рынком. Лучшее время с 16:00 до 21:00."}
+  ]},
+ {id:"d0312", date:"3 дек", wd:"чт", city:"Бангкок", concert:true, title:"Концерт 1",
+  lead:"Спокойный день у отеля, ранний выезд на стадион. Время начала смотрите в билете.", base:HOTEL_BKK,
+  stops:[
+   {id:"lumpini", name:"Парк Люмпини", time:"утро", area:"Силом / Ратчадамри", cat:"nature", lat:13.7314,lng:100.5414, q:"Lumpini Park",
+    desc:"Зелёный парк с озером и варанами. Утром прохладнее."},
+   {id:"one-bkk", name:"One Bangkok", time:"до обеда", area:"Rama IV", cat:"shop", lat:13.7266,lng:100.5476, q:"One Bangkok",
+    desc:"Новый район с ТЦ и кафе через дорогу от парка."},
+   {id:"hanaya", name:"Hanaya 1976", time:"обед", area:"Банграк", cat:"food", lat:13.7281,lng:100.5196, q:"Hanaya 1976 Bangkok",
+    desc:"Один из старейших японских ресторанов Таиланда. Хвалят суши и свежую рыбу, бывают очереди."},
+   {id:"rajamangala-1", name:"Rajamangala National Stadium", time:"выезд за 3 часа", area:"Хуамак, Бангкапи", cat:"concert", lat:13.7553,lng:100.6223, q:"Rajamangala National Stadium",
+    desc:"BTS WORLD TOUR «ARIRANG». Сцена 360°.", tip:"Обратно Grab после шоу будет дорогим и долгим: заранее договоритесь о точке встречи."}
+  ]},
+ {id:"d0412", date:"4 дек", wd:"пт", city:"Бангкок, юго-восток", title:"Ancient City и закат на Tichuca",
+  lead:"Поздний старт после концерта. Самутпракан, потом вверх по Сукхумвиту к закату.", base:HOTEL_BKK,
+  stops:[
+   {id:"ancient-city", name:"Ancient City (Муанг Боран)", time:"10:30", area:"Самутпракан", cat:"temple", lat:13.5397,lng:100.6237, q:"Ancient City Samut Prakan",
+    desc:"Огромный парк с копиями храмов и дворцов со всей страны. Храм из двух подборок thailandtale.", tip:"Территория большая: возьмите гольф-кар или велосипед на входе."},
+   {id:"erawan", name:"Erawan Museum", time:"14:00", area:"Самутпракан", cat:"temple", lat:13.5678,lng:100.6151, q:"Erawan Museum",
+    desc:"Музей внутри гигантского трёхглавого слона. Рядом с Ancient City."},
+   {id:"subsolum", name:"Subsolum", time:"16:00", area:"T-One Building, Sukhumvit 40", cat:"bar", lat:13.7194,lng:100.583, q:"Subsolum T-One Building Bangkok",
+    desc:"В том же здании, что и Tichuca."},
+   {id:"tichuca", name:"Tichuca Rooftop", time:"17:00", area:"T-One, 46 этаж", cat:"view", lat:13.7196,lng:100.5832, q:"Tichuca Rooftop Bar",
+    desc:"Руфтоп-джунгли со светящимся деревом и видом на 360°. Ежедневно 17:00–00:00.", tip:"Только без брони, приезжайте к открытию, иначе очередь к лифту."}
+  ]},
+ {id:"d0512", date:"5 дек", wd:"сб", city:"Бангкок, север", title:"Рынки, винтаж и MOCA",
+  lead:"Единственный подходящий выходной для Чатучака. 5 декабря национальный праздник, людей будет больше.", base:HOTEL_BKK,
+  stops:[
+   {id:"chatuchak", name:"Рынок Чатучак", time:"9:00", area:"Чатучак", cat:"market", lat:13.7999,lng:100.5508, q:"Chatuchak Weekend Market",
+    desc:"Огромный рынок выходного дня: одежда, сувениры, еда. Начинать с утра."},
+   {id:"dd-mall", name:"DD Mall / Bangsue Junction", time:"12:00", area:"MRT Kamphaeng Phet", cat:"shop", lat:13.8005,lng:100.5444, q:"Bangsue Junction",
+    desc:"Большой винтажный рынок: секонд, антиквариат, хэндмейд. 587/10 Kamphaeng Phet 2 Rd, 3 минуты от метро. Обычно 10:00–20:00."},
+   {id:"moca", name:"MOCA Bangkok", time:"14:00", area:"Kamphaeng Phet 6 Rd", cat:"art", lat:13.8513,lng:100.565, q:"MOCA Bangkok",
+    desc:"Музей современного тайского искусства на пяти этажах, есть этаж Тхавана Дучани. Вт–вс 10:00–18:00, около 300 бат."},
+   {id:"train-market", name:"Train Night Market Ratchada", time:"18:00", area:"MRT Thailand Cultural Centre", cat:"market", lat:13.7659,lng:100.5694, q:"Train Night Market Ratchada",
+    desc:"Снова открыт с марта 2026 на старом месте за ТЦ Esplanade. Ежедневно 17:00–01:00."}
+  ]},
+ {id:"d0612", date:"6 дек", wd:"вс", city:"Бангкок", concert:true, title:"Концерт 2",
+  lead:"Искусство и обед по пути на стадион. Возвращаться в отель перед шоу не нужно.", base:HOTEL_BKK,
+  stops:[
+   {id:"dib", name:"Dib Bangkok", time:"10:00", area:"Sukhumvit Soi 40", cat:"art", lat:13.7152,lng:100.5817, q:"Dib Bangkok",
+    desc:"Первый в Таиланде музей международного современного искусства в бывшем складе. Чт–пн 10:00–19:00, вход для иностранцев 700 бат.", tip:"Последний день поездки, когда музей открыт."},
+   {id:"cloud11", name:"Cloud 11", time:"13:00", area:"BTS Punnawithi", cat:"food", lat:13.6888,lng:100.6085, q:"Cloud 11 Bangkok",
+    desc:"Новый креативный комплекс: тайское искусство на 2 этаже, фуд-холл theCOMMONS на 4-м, парк на крыше."},
+   {id:"glass-pavilion", name:"Glass Pavilion, True Digital Park", time:"14:30", area:"Punnawithi", cat:"art", lat:13.6853,lng:100.6107, q:"True Digital Park Bangkok",
+    desc:"Павильон для медитации из стекла, дерева и воды, вдохновлённый тайской архитектурой."},
+   {id:"rajamangala-2", name:"Rajamangala National Stadium", time:"выезд заранее", area:"Хуамак", cat:"concert", lat:13.7553,lng:100.6223, q:"Rajamangala National Stadium",
+    desc:"Второе шоу.", tip:"Завтра выезд из отеля до 12:00: соберите чемоданы до концерта."}
+  ]},
+ {id:"d0712", date:"7 дек", wd:"пн", city:"→ Пхукет", title:"Перелёт на Пхукет",
+  lead:"Выезд из отеля до 12:00. Рейс лучше брать на 14:00–16:00. Билеты ещё не куплены.", base:HOME_HKT,
+  stops:[
+   {id:"bkk-checkout", name:"Выезд из отеля", time:"до 12:00", area:"Сатхон", cat:"stay", lat:HOTEL_BKK.lat,lng:HOTEL_BKK.lng, q:HOTEL_BKK.q,
+    desc:"Рейсы на Пхукет летают из Суварнабхуми и Донмыанга, проверьте аэропорт в билете. До обоих 40–60 минут."},
+   {id:"hkt-arrive", name:"Аэропорт Пхукета (HKT)", time:"≈17:00", area:"Север острова", cat:"plane", lat:8.1132,lng:98.3169, q:"Phuket International Airport",
+    desc:"До Карона 45–60 минут на такси."},
+   {id:"karon-home", name:"Дом в Кароне", time:"вечер", area:"Карон", cat:"stay", lat:HOME_HKT.lat,lng:HOME_HKT.lng, q:"Karon Beach Phuket",
+    desc:"Бронь Airbnb 7–11 декабря."},
+   {id:"karon-beach", name:"Пляж Карон, Centara Grand Beach", time:"закат", area:"Карон", cat:"nature", lat:7.8385,lng:98.2943, q:"Centara Grand Beach Resort Phuket",
+    desc:"Первый закат на море. Starbucks из списка тоже здесь."}
+  ]},
+ {id:"d0812", date:"8 дек", wd:"вт", city:"Пхукет", title:"Залив Пхангнга",
+  lead:"Одна экскурсия на целый день с трансфером из Карона.", base:HOME_HKT,
+  stops:[
+   {id:"phangnga", name:"Залив Пхангнга: мангры и скалы", time:"утро", area:"Пхангнга", cat:"nature", lat:8.275,lng:98.5,  q:"Phang Nga Bay",
+    desc:"Каяки среди известняковых скал и мангровых лесов."},
+   {id:"koh-panyee", name:"Ко Паньи", time:"обед", area:"Пхангнга", cat:"food", lat:8.3355,lng:98.5016, q:"Koh Panyee",
+    desc:"Рыбацкая деревня на сваях, обычно обед в экскурсии."},
+   {id:"plankton", name:"Каяк со светящимся планктоном", time:"после заката", area:"Пхангнга", cat:"nature", lat:8.22,lng:98.47, q:"Phang Nga Bay bioluminescent plankton kayak",
+    desc:"Выбирайте экскурсию, где вечерняя часть включена в программу."}
+  ]},
+ {id:"d0912", date:"9 дек", wd:"ср", city:"Пхукет", title:"Пхи-Пхи или Краби",
+  lead:"Выбрать что-то одно: тусовки на Пхи-Пхи или природа Краби.", base:HOME_HKT,
+  stops:[
+   {id:"phiphi", name:"Острова Пхи-Пхи", time:"весь день", area:"Морем ≈1,5–2 ч", cat:"nature", lat:7.7407,lng:98.7784, q:"Koh Phi Phi",
+    desc:"Бухты, снорклинг, вечеринки на пляже."},
+   {id:"krabi", name:"Краби: пляж со скалами", time:"вариант", area:"Railay", cat:"nature", lat:8.011,lng:98.838, q:"Railay Beach Krabi",
+    desc:"Пляжи у отвесных скал, спокойнее и красивее с точки зрения природы."}
+  ]},
+ {id:"d1012", date:"10 дек", wd:"чт", city:"Пхукет", title:"Обзорная по острову",
+  lead:"Главные смотровые и храмы юга острова, близко к Карону.", base:HOME_HKT,
+  stops:[
+   {id:"big-buddha", name:"Большой Белый Будда", time:"утро", area:"Холм над Кароном", cat:"temple", lat:7.8278,lng:98.3127, q:"Big Buddha Phuket",
+    desc:"Статуя на холме с видом на залив. Плечи и колени закрыты."},
+   {id:"wat-chalong", name:"Ват Чалонг", time:"день", area:"Чалонг", cat:"temple", lat:7.8469,lng:98.3365, q:"Wat Chalong",
+    desc:"Главный храм Пхукета."},
+   {id:"old-town", name:"Старый город Пхукета", time:"после обеда", area:"Пхукет-таун", cat:"shop", lat:7.884,lng:98.3881, q:"Phuket Old Town",
+    desc:"Цветные дома в сино-португальском стиле, кофейни."},
+   {id:"promthep", name:"Мыс Промтеп", time:"закат", area:"Юг острова", cat:"view", lat:7.7623,lng:98.3053, q:"Promthep Cape",
+    desc:"Самая известная точка для заката на Пхукете."}
+  ]},
+ {id:"d1112", date:"11 дек", wd:"пт", city:"Пхукет → домой", title:"Спа и вылет",
+  lead:"Выезд из дома, спа рядом с аэропортом, ночью вылет. Рейс PG280 в 22:00.", base:HOME_HKT,
+  stops:[
+   {id:"karon-checkout", name:"Выезд из дома в Кароне", time:"до ≈11:00", area:"Карон", cat:"stay", lat:HOME_HKT.lat,lng:HOME_HKT.lng, q:"Karon Beach Phuket",
+    desc:"Точное время выезда смотрите в брони Airbnb. Обед в Кароне."},
+   {id:"mandara", name:"Mandara Spa, JW Marriott Phuket", time:"≈14:00–17:00", area:"Май Кхао, 10–15 мин до аэропорта", cat:"spa", lat:8.1366,lng:98.2989, q:"Mandara Spa JW Marriott Phuket Resort",
+    desc:"Спа при курорте на пляже Май Кхао. Ужин в курорте или закат на пляже.", tip:"Забронируйте заранее и спросите, можно ли оставить чемоданы на время процедур."},
+   {id:"hkt-depart", name:"Аэропорт HKT → Бангкок", time:"≈19:00", area:"PG280, 22:00 → 23:35", cat:"plane", lat:8.1132,lng:98.3169, q:"Phuket International Airport",
+    desc:"Bangkok Airways, багаж 20 кг."},
+   {id:"bkk-transfer", name:"Пересадка в Суварнабхуми", time:"23:35 → 01:55", area:"MU548 в Шанхай", cat:"plane", lat:13.69,lng:100.7501, q:"Suvarnabhumi Airport",
+    desc:"Два отдельных билета: получить багаж, заново сдать его на международной регистрации и пройти паспортный контроль.", tip:"Онлайн-регистрация на MU548 сразу, как откроется."}
+  ]}
+];
+
+const IDEAS = [
+ {id:"i-cafes", t:"Кофейни из подборки", s:"Nana Coffee Roasters, Onion, Factory Coffee, Café Claire, Peace Oriental Teahouse, Mono Cafe, Little ZOO Café"},
+ {id:"i-coffee86", t:"Кофе −86 °C «Dirty Coffee»", s:"Из рилса exploresavourcreate, место в подписи не названо"},
+ {id:"i-brands", t:"Тайские бренды", s:"Topologie, Promthong, Matter Makers, Blue Elephant"},
+ {id:"i-misc", t:"Ещё из таблицы", s:"Tsutaya, 1981 soul&sold, blank space coffee, true alpha hub, Park Sathorn, Clutch bar, Sushiro, кружка из «Мака»"},
+ {id:"i-silom4", t:"Silom Soi 4", s:"ЛГБТ-бары рядом с отелем (DJ Station, G.O.D) — на любой свободный вечер"},
+ {id:"i-potong", t:"Ресторан Potong и Opium Bar", s:"Чайна-таун, бар работает ср–вс 18:00–00:00, ресторан по брони"},
+ {id:"i-pattaya", t:"Паттайя: Sanctuary of Truth", s:"Деревянный храм-дворец у моря, отдельный выезд на день"},
+ {id:"i-cheowlan", t:"Озеро Чео Лан, Кхао Сок", s:"2,5–3 часа от Пхукета в одну сторону"},
+ {id:"i-whitetemple", t:"Белый храм, Чианграй", s:"Возможен только перелётом на день вместо одного из дней в Бангкоке"},
+ {id:"i-elephants", t:"Этичный приют слонов", s:"Без катания, кормление и наблюдение"}
+];
+
+const CHECKLIST = [
+ {id:"c-tdac", t:"Заполнить TDAC на tdac.immigration.go.th", w:"с 25 ноября, каждой"},
+ {id:"c-esim", t:"Купить eSIM или решить со связью", w:"до вылета"},
+ {id:"c-cash", t:"Взять наличные доллары или евро", w:"российские карты в Таиланде не работают"},
+ {id:"c-airbnb", t:"На карте для Airbnb есть €1 141,24", w:"списание 28 ноября"},
+ {id:"c-hkt", t:"Купить билеты Бангкок → Пхукет на 7 декабря", w:"рейс после 14:00"},
+ {id:"c-spa", t:"Забронировать Mandara Spa и спросить про багаж", w:"на 11 декабря"},
+ {id:"c-latecheck", t:"Спросить хозяина Airbnb про поздний выезд", w:"11 декабря"},
+ {id:"c-cabaret", t:"Билеты на кабаре", w:"на 1 декабря"},
+ {id:"c-tickets", t:"Билеты на концерты и паспорта под рукой", w:"3 и 6 декабря"},
+ {id:"c-mu548", t:"Онлайн-регистрация на MU548", w:"как только откроется"},
+ {id:"c-apps", t:"Поставить Grab и Bolt", w:"до вылета"}
+];
+
+const FEES = {"bitstudio": ["ticket", "Билет 200–450 ฿", 200], "bacc": ["free", "Вход свободный"], "paragon": ["free", "Вход свободный"], "centralworld": ["free", "Вход свободный"], "lv-place": ["free", "Выставка бесплатная, но нужна запись на сайте LV The Place"], "stolen-sala": ["spend", "Без входного, платите за еду и напитки"], "mahanakhon": ["ticket", "≈1000 ฿ на кассе, онлайн и днём дешевле", 1000], "grand-palace": ["ticket", "500 ฿, включает Wat Phra Kaew", 500], "wat-pho": ["ticket", "300 ฿, только наличные", 300], "wat-arun": ["ticket", "200 ฿, только наличные; паром через реку — несколько бат", 200], "golden-mount": ["ticket", "100 ฿ за подъём на холм", 100], "song-wat": ["free", "Улица, вход свободный; условия у Margiela уточните на месте"], "soso": ["spend", "Без входного, платите за кофе"], "yaowarat": ["free", "Улица, платите только за еду"], "hex-bar": ["spend", "Без входного, платите за напитки"], "ayutthaya": ["ticket", "50 ฿ за храм или 220 ฿ за пропуск в 6 главных храмов, наличные", 220], "asiatique": ["ticket", "Набережная бесплатно; кабаре Calypso — от ≈900 ฿", 900], "skybar": ["spend", "Без входного, но напитки дорогие и строгий дресс-код"], "wat-samphran": ["free", "Вход свободный, пожертвование по желанию"], "space-time": ["ticket", "199–599 ฿ в зависимости от зон", 199], "chang-chui": ["free", "Вход свободный (на отдельные фестивали — билеты)"], "lumpini": ["free", "Вход свободный"], "one-bkk": ["free", "Вход свободный"], "hanaya": ["spend", "Ресторан, платите за еду"], "rajamangala-1": ["ticket", "По билету на концерт"], "ancient-city": ["ticket", "≈750 ฿ на кассе, онлайн от ≈380 ฿; велосипед или гольф-кар отдельно", 380], "erawan": ["ticket", "≈300–400 ฿; комбо с Ancient City онлайн выгоднее", 300], "subsolum": ["spend", "Обычно без входного; в вечера с ивентами может быть билет"], "tichuca": ["spend", "Без входного, только без брони; платите за напитки"], "chatuchak": ["free", "Вход свободный"], "dd-mall": ["free", "Вход свободный"], "moca": ["ticket", "300 ฿", 300], "train-market": ["free", "Вход свободный"], "dib": ["ticket", "700 ฿ для иностранцев", 700], "cloud11": ["free", "Вход свободный"], "glass-pavilion": ["free", "Вход свободный"], "rajamangala-2": ["ticket", "По билету на концерт"], "karon-beach": ["free", "Пляж бесплатный, лежаки и зонты платные"], "phangnga": ["tour", "Платная экскурсия; уточните, включён ли сбор нацпарка"], "koh-panyee": ["tour", "Обычно входит в экскурсию"], "plankton": ["tour", "Обычно входит в вечернюю часть экскурсии"], "phiphi": ["tour", "Экскурсия + сбор нацпарка 400 ฿ наличными на месте", 400], "krabi": ["free", "Пляж бесплатный, платите за лодку"], "big-buddha": ["free", "Бесплатно, пожертвование по желанию"], "wat-chalong": ["free", "Вход свободный"], "old-town": ["free", "Вход свободный"], "promthep": ["free", "Вход свободный"], "mandara": ["spend", "Платите за процедуры: у Mandara массаж обычно от ≈2500–3600 ฿ + 17% сборов, точные цены при записи"]};
+const TH = {"bkk-airport-in": "ท่าอากาศยานสุวรรณภูมิ", "bkk-transfer": "ท่าอากาศยานสุวรรณภูมิ", "bacc": "หอศิลปวัฒนธรรมแห่งกรุงเทพมหานคร", "paragon": "สยามพารากอน", "centralworld": "เซ็นทรัลเวิลด์", "lv-place": "เกษร อมรินทร์ (LV The Place)", "mahanakhon": "คิง เพาเวอร์ มหานคร", "grand-palace": "พระบรมมหาราชวัง", "wat-pho": "วัดโพธิ์ (วัดพระเชตุพนฯ)", "wat-arun": "วัดอรุณราชวราราม", "golden-mount": "วัดสระเกศ ภูเขาทอง", "song-wat": "ถนนทรงวาด", "soso": "ถนนทรงวาด", "yaowarat": "ถนนเยาวราช", "hex-bar": "ถนนวานิช 1 เยาวราช", "ayutthaya": "อุทยานประวัติศาสตร์พระนครศรีอยุธยา", "asiatique": "เอเชียทีค เดอะ ริเวอร์ฟรอนท์", "skybar": "ตึกสเตท ทาวเวอร์ (เลอบัว)", "wat-samphran": "วัดสามพราน นครปฐม", "space-time": "ซีคอนบางแค", "chang-chui": "ช่างชุ่ย", "lumpini": "สวนลุมพินี", "one-bkk": "วัน แบงค็อก", "rajamangala-1": "ราชมังคลากีฬาสถาน", "rajamangala-2": "ราชมังคลากีฬาสถาน", "ancient-city": "เมืองโบราณ สมุทรปราการ", "erawan": "พิพิธภัณฑ์ช้างเอราวัณ", "chatuchak": "ตลาดนัดจตุจักร", "moca": "พิพิธภัณฑ์ศิลปะไทยร่วมสมัย (MOCA)", "train-market": "ตลาดรถไฟรัชดา", "dib": "ดิบ บางกอก (ซอยสุขุมวิท 40)", "cloud11": "คลาวด์ อีเลฟเว่น", "glass-pavilion": "ทรู ดิจิทัล พาร์ค", "tichuca": "อาคารทีวัน ซอยสุขุมวิท 40", "subsolum": "อาคารทีวัน ซอยสุขุมวิท 40", "hkt-arrive": "ท่าอากาศยานภูเก็ต", "hkt-depart": "ท่าอากาศยานภูเก็ต", "karon-beach": "หาดกะรน", "karon-home": "หาดกะรน", "karon-checkout": "หาดกะรน", "phangnga": "อ่าวพังงา", "koh-panyee": "เกาะปันหยี", "phiphi": "หมู่เกาะพีพี", "krabi": "หาดไร่เลย์", "big-buddha": "พระใหญ่ภูเก็ต", "wat-chalong": "วัดฉลอง (วัดไชยธาราราม)", "old-town": "เมืองเก่าภูเก็ต", "promthep": "แหลมพรหมเทพ", "mandara": "JW Marriott Phuket — หาดไม้ขาว"};
+const HOURS = {"bacc": {"d": [0, 2, 3, 4, 5, 6], "o": "10:00", "c": "20:00"}, "paragon": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "22:00"}, "centralworld": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "22:00"}, "lv-place": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "20:00"}, "mahanakhon": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "19:00"}, "grand-palace": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "08:30", "c": "15:30", "n": "касса до 15:30"}, "wat-pho": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "08:00", "c": "19:30"}, "wat-arun": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "08:00", "c": "18:00"}, "golden-mount": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "07:00", "c": "19:00"}, "hex-bar": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "18:00", "c": "01:00", "n": "днём здесь кофейня, 07:00–16:00"}, "ayutthaya": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "08:00", "c": "18:00"}, "wat-samphran": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "06:00", "c": "18:00"}, "space-time": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:30", "c": "21:30"}, "chang-chui": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "11:00", "c": "23:00", "chk": "По части источников по средам закрыт — проверьте часы в Google Maps перед поездкой"}, "ancient-city": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "09:00", "c": "19:00", "n": "последний вход в 18:00"}, "erawan": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "09:00", "c": "18:00", "n": "последний вход в 17:00"}, "tichuca": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "17:00", "c": "00:00"}, "chatuchak": {"d": [0, 6], "o": "09:00", "c": "18:00", "n": "основной рынок только по выходным"}, "dd-mall": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "20:00", "n": "больше магазинов открыто пт–вс"}, "moca": {"d": [0, 2, 3, 4, 5, 6], "o": "10:00", "c": "18:00"}, "train-market": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "17:00", "c": "01:00"}, "dib": {"d": [0, 1, 4, 5, 6], "o": "10:00", "c": "19:00"}};
+const PHRASES = [["Здравствуйте", "สวัสดีค่ะ", "саватди кха"], ["Спасибо", "ขอบคุณค่ะ", "кхоп кхун кха"], ["Отвезите сюда, пожалуйста", "ไปที่นี่ค่ะ", "пай тхи ни кха"], ["По счётчику, пожалуйста", "เปิดมิเตอร์ด้วยค่ะ", "пэт митэ дуай кха"], ["Остановите здесь", "จอดตรงนี้ค่ะ", "джот тронг ни кха"], ["Сколько стоит?", "เท่าไหร่คะ", "тхао рай кха"], ["Можно дешевле?", "ลดได้ไหมคะ", "лот дай май кха"], ["Не острое, пожалуйста", "ไม่เผ็ดค่ะ", "май пхет кха"], ["Чуть-чуть острое", "เผ็ดนิดหน่อยค่ะ", "пхет нит ной кха"], ["Без льда", "ไม่ใส่น้ำแข็งค่ะ", "май сай нам кхэнг кха"], ["Счёт, пожалуйста", "เช็คบิลค่ะ", "чек бин кха"], ["Где туалет?", "ห้องน้ำอยู่ที่ไหนคะ", "хонг нам ю тхи най кха"], ["Помогите!", "ช่วยด้วย", "чуай дуай"]];
+const HOME_BKK = {ru:"Отель JC Kevin Sathorn", th:"โรงแรม เจซี เควิน สาทร", addr:"36 ถนนนราธิวาสราชนครินทร์ แขวงยานนาวา เขตสาทร กรุงเทพฯ 10120", en:"JC Kevin Sathorn Bangkok Hotel, 36 Naradhiwas Rajanagarindra Rd, Sathon", q:"JC Kevin Sathorn Bangkok Hotel"};
+const HOME_PKT = {ru:"Дом в Кароне", th:"หาดกะรน ภูเก็ต", addr:"Точный адрес дома — в приложении Airbnb", en:"Karon Beach, Phuket", q:"Karon Beach Phuket"};
+function dayDate(id){ return new Date(Date.UTC(2026, +id.slice(3,5)-1, +id.slice(1,3))); }
+function dayWd(id){ return dayDate(id).getUTCDay(); }
+function bkkNow(){ const n=new Date(); return new Date(n.getTime()+7*3600000); } // UTC fields = Bangkok local
+function todayId(){ const b=bkkNow(); const id="d"+String(b.getUTCDate()).padStart(2,"0")+String(b.getUTCMonth()+1).padStart(2,"0"); return DAYS.some(d=>d.id===id)?id:null; }
+const WD=["вс","пн","вт","ср","чт","пт","сб"];
+function hoursText(h){ if(!h) return ""; const all=h.d.length===7; return (all?"ежедневно ":h.d.map(x=>WD[x]).join(", ")+" ")+h.o+"–"+h.c+(h.n?" · "+h.n:""); }
+function openNow(h){ if(!h) return null; const b=bkkNow(); const wd=b.getUTCDay(); const mins=b.getUTCHours()*60+b.getUTCMinutes(); const t=x=>{const [a,c]=x.split(":").map(Number);return a*60+c;}; let o=t(h.o), c=t(h.c); if(c<=o) c+=1440;
+  const inToday = h.d.includes(wd) && mins>=o && mins<c; const prevWd=(wd+6)%7; const inPrev = h.d.includes(prevWd) && c>1440 && mins+1440<c; return inToday||inPrev; }
+function openDriver(name, th, extra, q){
+  const o=document.getElementById("driver");
+  o.querySelector(".dr-th").textContent=th||name;
+  o.querySelector(".dr-extra").textContent=extra||"";
+  o.querySelector(".dr-ru").textContent=name;
+  o.querySelector(".dr-map").href=gmaps(q||name);
+  o.classList.add("open");
+  mo(o.querySelector(".dr-card"),{opacity:[0,1],scale:[0.94,1]},{type:"spring",bounce:0.25,duration:0.45});
+}
+const LEGS = {"d2811": [[0, "taxi", "Из аэропорта в отель: такси со стоянки в зале прилёта по счётчику или Grab", "40–60 мин", 300, 450, "car", "К счётчику добавятся 50 ฿ сбора аэропорта и платные дороги"]], "d2911": [[-1, "grab", "Из отеля в bit.studio", "15–20 мин", 90, 140, "car", "Или MRT Lumphini → Sam Yan, ≈20 ฿"], [0, "grab", "До BACC", "10 мин", 70, 110, "car", ""], [1, "walk", "До Siam Paragon пешком по крытому переходу", "5 мин", 0, 0, "pp", ""], [2, "walk", "До CentralWorld по скайуоку", "10 мин", 0, 0, "pp", ""], [3, "walk", "До Gaysorn Amarin", "5 мин", 0, 0, "pp", ""], [4, "walk", "До Canvas Ploenchit, напротив Central Embassy", "10 мин", 0, 0, "pp", ""], [5, "bts", "BTS Phloen Chit → Siam → Chong Nonsi", "20 мин", 30, 40, "pp", ""], [6, "grab", "Обратно в отель", "10 мин", 60, 90, "car", "Или пешком 20 мин"]], "d3011": [[-1, "grab", "Из отеля к Большому дворцу", "25 мин", 130, 180, "car", "Или MRT Lumphini → Sanam Chai, ≈30 ฿, и 10 мин пешком"], [0, "walk", "До Ват Пхо", "10 мин", 0, 0, "pp", ""], [1, "boat", "Паром от пристани Tha Tien через реку", "5 мин", 5, 5, "pp", "Платите наличными на пристани"], [2, "grab", "Паром обратно, затем Grab до Golden Mount", "25 мин", 80, 120, "car", ""], [3, "grab", "До Song Wat", "15 мин", 70, 100, "car", ""], [4, "walk", "Пешком по Song Wat", "2 мин", 0, 0, "pp", ""], [5, "walk", "До Яоварата", "10 мин", 0, 0, "pp", ""], [6, "walk", "До Hex Bar", "5 мин", 0, 0, "pp", ""], [7, "grab", "Обратно в отель", "20 мин", 100, 150, "car", "Или MRT Wat Mangkon → Lumphini, ≈30 ฿"]], "d0112": [[-1, "car", "Машина с водителем на весь день: туда, между храмами и обратно", "1,5 ч в одну сторону", 1800, 2500, "car", "Ориентир по цене, договаривайтесь заранее через Grab Rent или экскурсионное бюро"], [0, "grab", "Из отеля на Asiatique", "10–15 мин", 70, 100, "car", ""], [1, "grab", "До Sky Bar", "10 мин", 70, 110, "car", ""], [2, "grab", "Обратно в отель", "10 мин", 60, 90, "car", ""]], "d0212": [[-1, "grab", "Из отеля в Wat Samphran", "≈1 ч", 450, 600, "car", "Общественный транспорт туда неудобен"], [0, "grab", "До ТЦ Seacon Bangkae", "35 мин", 300, 400, "car", ""], [1, "grab", "До Chang Chui", "25 мин", 150, 220, "car", ""], [2, "grab", "Обратно в отель", "30 мин", 180, 260, "car", ""]], "d0312": [[-1, "walk", "Из отеля в парк Люмпини", "25 мин", 0, 0, "pp", "Или Grab ≈60–90 ฿"], [0, "walk", "До One Bangkok", "5 мин", 0, 0, "pp", ""], [1, "grab", "До Hanaya 1976", "15 мин", 70, 110, "car", ""], [2, "grab", "После отдыха в отеле — на стадион", "40–70 мин", 250, 400, "car", "Выезжайте за 3 часа: перед шоу пробки и повышенный тариф"], [3, "grab", "После шоу обратно в отель", "40–90 мин", 300, 600, "car", "Быстрее отойти пешком 20–30 мин к станции Airport Rail Link Ramkhamhaeng и ехать поездом, ≈40–60 ฿"]], "d0412": [[-1, "bts", "BTS Chong Nonsi → Siam → Kheha, затем такси 5 мин", "≈1 ч 10 мин", 75, 85, "pp", "Вместе с долей такси от станции"], [0, "grab", "До Erawan Museum", "20 мин", 150, 220, "car", ""], [1, "bts", "BTS Chang Erawan → Ekkamai, затем 10 мин пешком", "40 мин", 40, 50, "pp", ""], [2, "walk", "В том же здании T-One", "1 мин", 0, 0, "pp", ""], [3, "grab", "Обратно в отель", "30 мин", 150, 220, "car", ""]], "d0512": [[-1, "mrt", "MRT Lumphini → Kamphaeng Phet", "30 мин", 35, 40, "pp", "До станции Lumphini 15 мин пешком или Grab"], [0, "walk", "До DD Mall", "10 мин", 0, 0, "pp", ""], [1, "grab", "До MOCA", "20 мин", 120, 170, "car", ""], [2, "grab", "До Train Night Market", "30 мин", 150, 220, "car", ""], [3, "mrt", "MRT Thailand Cultural Centre → Lumphini", "25 мин", 30, 35, "pp", ""]], "d0612": [[-1, "grab", "Из отеля в Dib Bangkok", "25 мин", 150, 200, "car", ""], [0, "grab", "До Cloud 11", "15 мин", 90, 130, "car", "Или BTS Ekkamai → Punnawithi, ≈30 ฿"], [1, "walk", "До True Digital Park", "5 мин", 0, 0, "pp", ""], [2, "grab", "На стадион", "30–50 мин", 200, 320, "car", ""], [3, "grab", "После шоу обратно в отель", "40–90 мин", 300, 600, "car", "Или пешком к Airport Rail Link Ramkhamhaeng и поездом"]], "d0712": [[0, "grab", "Из отеля в аэропорт", "40–60 мин", 350, 500, "car", "Берите GrabCar XL или два такси: четыре человека с чемоданами"], [1, "grab", "Из аэропорта Пхукета в Карон: Bolt или Grab", "50–60 мин", 800, 1100, "car", "Bolt обычно дешевле Grab"], [2, "walk", "До пляжа", "5–10 мин", 0, 0, "pp", ""]], "d0812": [[-1, "tour", "Трансфер из Карона входит в экскурсию", "", 0, 0, "pp", ""]], "d0912": [[-1, "tour", "Трансфер и лодка входят в экскурсию", "", 0, 0, "pp", ""]], "d1012": [[-1, "grab", "Из Карона к Большому Будде", "20 мин", 300, 450, "car", "Можно взять машину с водителем на день, ≈2000–3000 ฿"], [0, "grab", "До Ват Чалонг", "15 мин", 250, 350, "car", ""], [1, "grab", "До старого города", "25 мин", 300, 400, "car", ""], [2, "grab", "До мыса Промтеп", "40 мин", 500, 700, "car", ""], [3, "grab", "Обратно в Карон", "25 мин", 300, 450, "car", ""]], "d1112": [[0, "grab", "Из Карона в JW Marriott, Май Кхао", "≈1 ч", 800, 1100, "car", ""], [1, "grab", "В аэропорт", "15 мин", 200, 350, "car", ""]]};
+const MODE={walk:["Пешком","#7A8A84"],bts:["BTS","#2E9A4E"],mrt:["MRT","#2F6FB5"],arl:["Airport Rail Link","#B5473A"],boat:["Паром","#2A9BB0"],grab:["Grab / Bolt","#B9800F"],taxi:["Такси","#B9800F"],car:["Машина с водителем","#8A5A2B"],tour:["Экскурсия","#7A4BD8"],plane:["Самолёт","#5B6B78"]};
+const GROUP=4;
+function legPP(l){ const [a,mode,t,m,lo,hi,per]=l; return per==="car"?[Math.round(lo/GROUP/5)*5,Math.round(hi/GROUP/5)*5]:[lo,hi]; }
+function dayTransport(id){ let lo=0,hi=0; (LEGS[id]||[]).forEach(l=>{ const [a,b]=legPP(l); lo+=a; hi+=b; }); return [lo,hi]; }
+function legRow(l){
+  const [after,mode,text,mins,lo,hi,per,alt]=l; const md=MODE[mode]||MODE.walk;
+  const row=el("div",{class:"leg leg-"+mode});
+  const pp=legPP(l);
+  const price = (lo===0&&hi===0) ? (mode==="tour"?"":"бесплатно") : (per==="car" ? `≈${lo}–${hi} ฿ за машину, ≈${pp[0]}–${pp[1]} ฿ с человека` : (lo===hi?`≈${lo} ฿ с человека`:`≈${lo}–${hi} ฿ с человека`));
+  row.innerHTML=`<div></div><div class="leg-rail"><span class="leg-dot" style="background:${md[1]}"></span></div><div class="leg-body"><div class="leg-main"><b style="color:${md[1]}">${esc(md[0])}</b>${mins?`<span>${esc(mins)}</span>`:""}${price?`<span>${esc(price)}</span>`:""}</div><div class="leg-txt">${esc(text)}${alt?`. ${esc(alt)}`:""}</div></div>`;
+  return row;
+}
+const MEALS = {"d2811": [[1, "Ужин", "Рядом с отелем: уличная еда или 7-Eleven", 80, 200, "После перелёта не ищите далеко"]], "d2911": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [2, "Обед", "Фуд-холл Gourmet Eats в Siam Paragon или FoodWorld в CentralWorld", 150, 300, ""], [5, "Кофе и десерт", "В Stolen Sala", 150, 300, ""], [6, "Ужин", "Silom и Чонг Нонси: уличная еда или кафе", 200, 450, ""]], "d3011": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [2, "Обед", "Тайское кафе у пристаней Tha Tien и Tha Maharaj", 150, 300, ""], [5, "Кофе", "В soso coffee", 100, 180, ""], [6, "Ужин", "Уличная еда на Яоварате: берите 3–4 блюда вскладчину", 250, 500, "Самые известные лотки стоят дороже и с очередью"], [7, "Коктейль", "Один напиток в Hex Bar", 350, 450, ""]], "d0112": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [0, "Обед", "В Аюттайе: лапша в лодочке дёшево, речные креветки дороже", 150, 400, ""], [1, "Ужин", "На Asiatique", 300, 600, ""], [2, "Коктейль", "Один напиток в Sky Bar", 900, 1200, "Цены в меню без сервисного сбора и налога"]], "d0212": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [1, "Обед", "Фуд-корт в Seacon Bangkae", 100, 250, ""], [2, "Ужин", "На рынке Chang Chui", 200, 450, ""]], "d0312": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [2, "Обед", "В Hanaya 1976", 300, 600, "Плотно поесть до концерта"], [3, "У стадиона и после шоу", "Лотки у стадиона, ночью 7-Eleven или уличная еда", 200, 450, "Воду в бутылке на стадион обычно не пускают"]], "d0412": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [0, "Обед", "Кафе на территории Ancient City", 120, 250, ""], [2, "Кофе", "В Subsolum", 120, 200, ""], [3, "Коктейль", "Один напиток в Tichuca", 400, 550, ""], [3, "Ужин", "Экамай и Тонглор: кафе или рынок", 300, 600, ""]], "d0512": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [0, "Обед", "Уличная еда на Чатучаке, кокосовое мороженое", 150, 300, ""], [3, "Ужин", "Train Night Market (Jodd Fairs)", 200, 400, ""]], "d0612": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [1, "Обед", "Фуд-холл theCOMMONS в Cloud 11", 150, 400, ""], [3, "У стадиона и после шоу", "Лотки у стадиона, ночью 7-Eleven или уличная еда", 200, 450, ""]], "d0712": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [0.5, "Перекус", "В аэропорту перед вылетом", 150, 350, "В аэропорту всё дороже, можно взять еду с собой"], [3, "Ужин", "Тайское кафе в Кароне, у пляжа", 250, 500, "На Пхукете еда в среднем дороже, чем в Бангкоке"]], "d0812": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [1, "Обед", "Обычно входит в экскурсию", 0, 0, ""], [2, "Ужин", "Часто входит в вечернюю программу; если нет — кафе в Кароне", 0, 400, ""]], "d0912": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [0, "Обед", "Обычно входит в экскурсию", 0, 0, ""], [1, "Ужин", "Кафе в Кароне", 250, 500, ""]], "d1012": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [2, "Обед", "Кафе в старом городе", 150, 350, ""], [3, "Ужин", "Морепродукты на рынке Раваи рядом с Промтепом", 300, 700, "Рыбу выбираете на рынке, за приготовление платите отдельно"]], "d1112": [[-1, "Завтрак", "Кафе рядом с жильём или 7-Eleven", 80, 200, "Если завтрак входит в бронь, вычтите"], [1, "Обед", "Кафе в JW Marriott, после спа", 500, 900, "В отеле к цене добавят около 17% сборов"], [3, "Еда при пересадке", "В аэропорту Бангкока", 200, 400, ""]]};
+const SNACK_X = {"d2811": [50, 100]};
+const SNACK=[100,200];
+function daySnack(id){ return SNACK_X[id]||SNACK; }
+function dayFood(id){ let lo=0,hi=0; (MEALS[id]||[]).forEach(m=>{lo+=m[3];hi+=m[4];}); const sn=daySnack(id); return [lo+sn[0],hi+sn[1]]; }
+function mealRow(m){
+  const [at,slot,where,lo,hi,tip]=m;
+  const row=el("div",{class:"leg meal"});
+  const price = (lo===0&&hi===0) ? "входит в экскурсию" : (lo===0 ? `до ≈${hi} ฿ с человека` : `≈${lo}–${hi} ฿ с человека`);
+  row.innerHTML=`<div></div><div class="leg-rail"><span class="leg-dot meal-dot"></span></div><div class="leg-body"><div class="leg-main"><b class="meal-slot">${esc(slot)}</b><span>${esc(price)}</span></div><div class="leg-txt">${esc(where)}${tip?`. ${esc(tip)}`:""}</div></div>`;
+  return row;
+}
+function snackRow(id){ const sn=daySnack(id); return mealRow([0,"В течение дня","Вода, фрукты, кофе и перекусы",sn[0],sn[1],""]); }
+function tripTotals(){ let f=[0,0],t=[0,0],e=0; DAYS.forEach(d=>{ const a=dayFood(d.id),b=dayTransport(d.id); f[0]+=a[0];f[1]+=a[1];t[0]+=b[0];t[1]+=b[1]; e+=d.stops.reduce((x,s)=>x+((FEES[s.id]&&FEES[s.id][2])||0),0); }); return {f,t,e}; }
+const PHOTOS = {"bkk-airport-in": {"f": "photos/bkk-airport-in.jpg", "a": "Grendelkhan", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Suvarnabhumi_Airport_Terminal_E_interior_at_dusk.jpg"}, "bacc": {"f": "photos/bacc.jpg", "a": "Supanut Arunoprayote", "l": "CC BY 4.0", "u": "https://commons.wikimedia.org/wiki/File:BKK_Art_and_Culture_Centre_(II).jpg"}, "paragon": {"f": "photos/paragon.jpg", "a": "Supanut Arunoprayote", "l": "CC BY 4.0", "u": "https://commons.wikimedia.org/wiki/File:Siam_Paragon_06.23.jpg"}, "centralworld": {"f": "photos/centralworld.jpg", "a": "Supanut Arunoprayote", "l": "CC BY 4.0", "u": "https://commons.wikimedia.org/wiki/File:Central_World_(I).jpg"}, "lv-place": {"f": "photos/lv-place.jpg", "a": "DMS WIKI", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:Louis_Vuitton_Gaysorn_Amarin_20240229.jpg"}, "mahanakhon": {"f": "photos/mahanakhon.jpg", "a": "Ronit Bhattacharjee", "l": "CC BY 2.0", "u": "https://commons.wikimedia.org/wiki/File:Panorama_from_top_of_King_Power_Maha_Nakhon_Tower.jpg"}, "grand-palace": {"f": "photos/grand-palace.jpg", "a": "Preecha.MJ", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:0005574_-_Wat_Phra_Kaew_006.jpg"}, "wat-pho": {"f": "photos/wat-pho.jpg", "a": "Mastertongapollo", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg"}, "wat-arun": {"f": "photos/wat-arun.jpg", "a": "Mastertongapollo", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg"}, "golden-mount": {"f": "photos/golden-mount.jpg", "a": "BerryJ", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AA%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%81%E0%B8%A8-2.jpg"}, "song-wat": {"f": "photos/song-wat.jpg", "a": "Dharmadana", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:%E0%B8%95%E0%B8%B6%E0%B8%81%E0%B9%81%E0%B8%82%E0%B8%81%E0%B8%96%E0%B8%99%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%A7%E0%B8%B2%E0%B8%94_2.jpg"}, "yaowarat": {"f": "photos/yaowarat.jpg", "a": "กสิณธร ราชโอรส", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:(2022)_%E0%B8%95%E0%B8%B6%E0%B8%81%E0%B9%81%E0%B8%96%E0%B8%A7%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B8%96%E0%B8%99%E0%B8%99%E0%B9%80%E0%B8%A2%E0%B8%B2%E0%B8%A7%E0%B8%A3%E0%B8%B2%E0%B8%8A_%E0%B9%80%E0%B8%82%E0%B8%95%E0%B8%AA%E0%B8%B1%E0%B8%A1%E0%B8%9E%E0%B8%B1%E0%B8%99%E0%B8%98%E0%B8%A7%E0%B8%87%E0%B8%A8%E0%B9%8C_%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3_(4).jpg"}, "ayutthaya": {"f": "photos/ayutthaya.jpg", "a": "Evilarry", "l": "Public domain", "u": "https://commons.wikimedia.org/wiki/File:Ayutthaya_Thailand_2004.jpg"}, "asiatique": {"f": "photos/asiatique.jpg", "a": "Supanut Arunoprayote", "l": "CC BY 4.0", "u": "https://commons.wikimedia.org/wiki/File:Asiatique_(II).jpg"}, "skybar": {"f": "photos/skybar.jpg", "a": "Zeugma fr (talk) (Antoine FLEURY-GOBERT)", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:State_Tower_dome_-_Bangkok.jpg"}, "wat-samphran": {"f": "photos/wat-samphran.jpg", "a": "DiverDave", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:Wat_Samphran_(2).jpg"}, "space-time": {"f": "photos/space-time.jpg", "a": "Supanut Arunoprayote", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:Seacon_Bangkae.jpg"}, "lumpini": {"f": "photos/lumpini.jpg", "a": "Terence Ong", "l": "CC BY 2.5", "u": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_Lumphini_Park.jpg"}, "one-bkk": {"f": "photos/one-bkk.jpg", "a": "Chainwit.", "l": "CC BY 4.0", "u": "https://commons.wikimedia.org/wiki/File:One_Bangkok_from_Witthayu_Junction_(2024-10-26)_03.jpg"}, "rajamangala-1": {"f": "photos/concert-1.jpg", "a": "", "l": "", "u": ""}, "ancient-city": {"f": "photos/ancient-city.jpg", "a": "กสิณธร ราชโอรส", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%9A%E0%B8%A3%E0%B8%B2%E0%B8%93_%E0%B8%AA%E0%B8%A1%E0%B8%B8%E0%B8%97%E0%B8%A3%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3_Ancient_City,Samutprakan_(94).jpg"}, "erawan": {"f": "photos/erawan.jpg", "a": "Ddalbiez", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Erawan_museum-001.jpg"}, "chatuchak": {"f": "photos/chatuchak.jpg", "a": "Azreey", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Bangkok_-_Jatujak_Market_02.JPG"}, "moca": {"f": "photos/moca.jpg", "a": "Smuconlaw", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:Museum_of_Contemporary_Art_(MOCA),_Bangkok,_Thailand_-_20161201-05.jpg"}, "train-market": {"f": "photos/train-market.jpg", "a": "aotaro from Yokohama, Japan", "l": "CC BY 2.0", "u": "https://commons.wikimedia.org/wiki/File:Train_Night_Market_Ratchada_(34079339800).jpg"}, "glass-pavilion": {"f": "photos/glass-pavilion.jpg", "a": "ตัวเอง", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:True_Digital_Park_Main_Building.JPG"}, "hkt-arrive": {"f": "photos/hkt-arrive.jpg", "a": "Athikhun.suw", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:Phuket_international_airport_domestic_terminal_2019.jpg"}, "karon-beach": {"f": "photos/karon-beach.jpg", "a": "см. страницу файла", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Karonbeach_2004.jpg"}, "phangnga": {"f": "photos/phangnga.jpg", "a": "Vyacheslav Argenberg", "l": "CC BY 4.0", "u": "https://commons.wikimedia.org/wiki/File:Dramatic_karst_landscape_of_Phang_Nga_Bay,_Thailand.jpg"}, "koh-panyee": {"f": "photos/koh-panyee.jpg", "a": "Diego Delso", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Isla_Panyee,_Phuket,_Tailandia,_2013-08-20,_DD_10.JPG"}, "phiphi": {"f": "photos/phiphi.jpg", "a": "Luxure", "l": "CC BY 3.0 au", "u": "https://commons.wikimedia.org/wiki/File:KohPhiPhi.JPG"}, "krabi": {"f": "photos/krabi.jpg", "a": "kallerna", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Railay_Beach_5.jpg"}, "big-buddha": {"f": "photos/big-buddha.jpg", "a": "Subhrajyoti07", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:The_Big_Buddha,_Phuket.jpg"}, "wat-chalong": {"f": "photos/wat-chalong.jpg", "a": "Lerdsuwa", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Wat_chalong_pagoda.jpg"}, "old-town": {"f": "photos/old-town.jpg", "a": "Myinternationalwikipedia", "l": "CC0", "u": "https://commons.wikimedia.org/wiki/File:Phuket_City.jpg"}, "promthep": {"f": "photos/promthep.jpg", "a": "Phuket@photographer.net", "l": "CC BY 2.0", "u": "https://commons.wikimedia.org/wiki/File:Beautiful_Sunset_on_Promthep_Cape,_Phuket_island,_Thailand.jpg"}, "mandara": {"f": "photos/mandara.jpg", "a": "Mikhail Deynekin", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Mai_Khao_Beach_-_panoramio.jpg"}, "rajamangala-2": {"f": "photos/concert-2.jpg", "a": "", "l": "", "u": ""}, "hkt-depart": {"f": "photos/hkt-arrive.jpg", "a": "Athikhun.suw", "l": "CC BY-SA 4.0", "u": "https://commons.wikimedia.org/wiki/File:Phuket_international_airport_domestic_terminal_2019.jpg"}, "bkk-transfer": {"f": "photos/bkk-airport-in.jpg", "a": "Grendelkhan", "l": "CC BY-SA 3.0", "u": "https://commons.wikimedia.org/wiki/File:Suvarnabhumi_Airport_Terminal_E_interior_at_dusk.jpg"}};
+/* ---------- ICONS (drawn) ---------- */
+const CAT = {
+ temple:{c:"#C98A12",l:"Храм"}, art:{c:"#3E7CB1",l:"Искусство"}, shop:{c:"#B5527A",l:"Шопинг"}, food:{c:"#D0663A",l:"Еда"},
+ bar:{c:"#7A4FB8",l:"Бар"}, market:{c:"#2E8B6E",l:"Рынок"}, view:{c:"#356F8F",l:"Вид"}, nature:{c:"#3C8D4A",l:"Природа"},
+ plane:{c:"#5B6B78",l:"Перелёт"}, stay:{c:"#6B7A5A",l:"Жильё"}, concert:{c:"#6C4BD1",l:"Концерт"}, show:{c:"#A8457A",l:"Шоу"}, spa:{c:"#3F9A9A",l:"Спа"}
+};
+function glyph(cat){
+  const s='fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  const g={
+   temple:`<path ${s} d="M24 6l3 7h-6zM18 13h12l2 8H16zM14 21h20v4H14zM16 25v13M32 25v13M22 38v-7h4v7M10 38h28"/>`,
+   art:`<rect ${s} x="10" y="12" width="28" height="24" rx="2"/><path ${s} d="M14 32l7-8 5 5 4-4 4 7"/><circle ${s} cx="30" cy="18" r="2"/>`,
+   shop:`<path ${s} d="M13 18h22l-2 20H15zM19 18v-3a5 5 0 0110 0v3"/>`,
+   food:`<path ${s} d="M10 24h28a14 14 0 01-28 0zM16 18c0-3 3-3 3-6M24 18c0-3 3-3 3-6M32 18c0-3 3-3 3-6"/>`,
+   bar:`<path ${s} d="M14 12h20l-10 13zM24 25v11M18 36h12"/>`,
+   market:`<path ${s} d="M10 18l4-7h20l4 7zM10 18c0 3 4 3 4 0 0 3 5 3 5 0 0 3 5 3 5 0 0 3 5 3 5 0 0 3 4 3 4 0M13 22v15h22V22M21 37v-8h6v8"/>`,
+   view:`<path ${s} d="M17 38V10h10v28M27 18h6v20M11 38h26M20 15h4M20 20h4M20 25h4"/>`,
+   nature:`<path ${s} d="M8 30c4-4 8-4 12 0s8 4 12 0 6-3 8-1M8 36c4-4 8-4 12 0s8 4 12 0 6-3 8-1M30 12a6 6 0 100 0.1"/>`,
+   plane:`<path ${s} d="M10 27l28-12-6 20-8-6-5 6v-8l13-10-17 8z"/>`,
+   stay:`<path ${s} d="M10 22l14-11 14 11M14 19v17h20V19M21 36v-8h6v8"/>`,
+   concert:`<rect ${s} x="19" y="8" width="10" height="17" rx="5"/><path ${s} d="M14 22a10 10 0 0020 0M24 32v6M18 38h12"/>`,
+   show:`<path ${s} d="M12 14c8 4 16 4 24 0v10c0 8-6 13-12 13s-12-5-12-13zM18 22h3M27 22h3M19 29c3 3 7 3 10 0"/>`,
+   spa:`<path ${s} d="M24 12c5 6 5 12 0 18-5-6-5-12 0-18zM12 22c6 1 10 5 12 8M36 22c-6 1-10 5-12 8M10 36h28"/>`
+  };
+  return `<svg viewBox="0 0 48 48" aria-hidden="true">${g[cat]||g.view}</svg>`;
+}
+
+/* ---------- STATE & SYNC ---------- */
+const state = {places:{}, checklist:{}};
+let db=null, assets=null, mode="local"; // "db" | "local"
+const LS_KEY="bts-thai-trip-v1";
+function loadLocal(){ try{ const raw=localStorage.getItem(LS_KEY); if(raw){ const o=JSON.parse(raw); Object.assign(state.places,o.places||{}); Object.assign(state.checklist,o.checklist||{}); ["expenses","votes","packing"].forEach(k=>{ if(o[k]) state[k]=Object.assign(state[k]||{},o[k]); }); if(o.shared) state.shared=Object.assign(state.shared||{},o.shared);} }catch(e){} }
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function P(id){ return state.places[id] || {done:false,note:"",photos:[]}; }
+
+const chains={}; // one write at a time per doc
+function queueWrite(path, bodyFn){
+  const prev = chains[path] || Promise.resolve();
+  const next = prev.then(async ()=>{
+    if(mode!=="db" || !db){ saveLocal(); return; }
+    try{ await db.doc(path).set(bodyFn()); }
+    catch(e){
+      if(e && e.code==="unavailable"){ await new Promise(r=>setTimeout(r,800+Math.random()*700)); try{ await db.doc(path).set(bodyFn()); return; }catch(e2){} }
+      fallbackLocal("Не получилось сохранить в общий доступ. Отметки сохраняются только на этом устройстве. Попросите владелицу дать вам доступ на редактирование.");
+      saveLocal();
+    }
+  });
+  chains[path]=next.catch(()=>{});
+  return next;
+}
+function savePlace(id){ const p=P(id); state.places[id]=p; saveLocal(); return queueWrite("places/"+id, ()=>({done:!!p.done, doneAt:p.done&&p.doneAt?String(p.doneAt).slice(0,10):"", note:String(p.note||"").slice(0,4000), photos:(p.photos||[]).slice(0,24), by:String(p.by||"")})); }
+function saveChecklist(){ saveLocal(); return queueWrite("checklist/main", ()=>({items:{...state.checklist}})); }
+
+function fallbackLocal(msg){
+  mode="local";
+  const n=document.getElementById("syncNote"); n.textContent=msg; n.classList.remove("hidden");
+}
+
+async function initSync(){
+  loadLocal(); render();
+  if(!window.claude || !window.claude.use){ fallbackLocal("Отметки и заметки сохраняются только на этом устройстве."); return; }
+  try{ db = await window.claude.use("db"); }catch(e){ db=null; }
+  if(!db){ fallbackLocal("Отметки и заметки сохраняются только на этом устройстве: общий доступ здесь недоступен."); return; }
+  mode="db";
+  try{ assets = await window.claude.use("assets"); }catch(e){ assets=null; }
+  let gotFirst=false;
+  const timer=setTimeout(()=>{ if(!gotFirst){ const n=document.getElementById("syncNote"); n.textContent="Общие отметки пока не загрузились. Можно продолжать: изменения сохранятся, как только появится связь."; n.classList.remove("hidden"); } },10000);
+  db.collection("places").onSnapshot(snap=>{
+    snap.docs.forEach(d=>{ const v=d.data()||{}; if(!editing.has(d.id)) state.places[d.id]={done:!!v.done, doneAt:typeof v.doneAt==="string"?v.doneAt:"", note:typeof v.note==="string"?v.note:"", photos:Array.isArray(v.photos)?v.photos.filter(x=>typeof x==="string"):[], by:typeof v.by==="string"?v.by:""}; });
+    if(!snap.metadata.fromCache){ gotFirst=true; clearTimeout(timer); document.getElementById("syncNote").classList.add("hidden"); }
+    saveLocal(); softRender();
+  }, err=>{ clearTimeout(timer); fallbackLocal("Общие отметки недоступны, сохраняем только на этом устройстве."); });
+  db.collection("expenses").onSnapshot(snap=>{ snap.docs.forEach(d=>{ const v=d.data()||{}; if(typeof v.t==="string"&&typeof v.a==="number") state.expenses[d.id]={t:v.t,a:v.a,cur:v.cur==="RUB"?"RUB":"THB",by:String(v.by||""),among:Array.isArray(v.among)?v.among.filter(x=>typeof x==="string"):[],at:String(v.at||""),who:String(v.who||""),deleted:!!v.deleted}; }); saveLocal(); if(currentTab==="money"&&!editing.size) renderMoney(); }, ()=>{});
+  db.collection("votes").onSnapshot(snap=>{ snap.docs.forEach(d=>{ const v=d.data()||{}; const o={}; Object.keys(v).forEach(k=>{ if(/^p[0-3]$/.test(k)) o[k]=!!v[k]; }); state.votes[d.id]=o; }); saveLocal(); softRender(); }, ()=>{});
+  db.collection("packing").onSnapshot(snap=>{ snap.docs.forEach(d=>{ const v=d.data()||{}; const it=v.items||{}; const o={}; Object.keys(it).forEach(k=>o[k]=!!it[k]); state.packing[d.id]=o; }); saveLocal(); }, ()=>{});
+  db.doc("shared/main").onSnapshot(sn=>{ if(sn.exists){ const v=sn.data()||{}; if(typeof v.rate==="number") state.shared.rate=v.rate; if(v.meet&&typeof v.meet==="object") state.shared.meet={...v.meet}; saveLocal(); if(!editing.size){ if(currentTab==="money") renderMoney(); else softRender(); } } }, ()=>{});
+  db.doc("checklist/main").onSnapshot(s=>{
+    if(s.exists){ const v=s.data()||{}; const it=v.items||{}; Object.keys(it).forEach(k=>state.checklist[k]=!!it[k]); saveLocal(); softRender(); }
+  }, ()=>{});
+}
+
+/* ---------- RENDER ---------- */
+let currentDay = DAYS[0].id, currentTab="route";
+const editing = new Set();
+const el=(t,a={},h="")=>{const e=document.createElement(t);for(const k in a){ if(k==="class")e.className=a[k]; else e.setAttribute(k,a[k]); } if(h)e.innerHTML=h; return e;};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const gmaps=q=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
+
+function allStops(){ return DAYS.flatMap(d=>d.stops); }
+function renderStats(){
+  const st=allStops(); const done=st.filter(s=>P(s.id).done).length;
+  const start=new Date("2026-11-27T21:05:00+03:00"); const now=new Date();
+  const days=Math.ceil((start-now)/86400000);
+  const left = days>0 ? `<span class="stat"><b>${days} ${plural(days,"день","дня","дней")}</b>до вылета</span>` : `<span class="stat"><b>В пути</b>поездка идёт</span>`;
+  const ck=CHECKLIST.filter(c=>state.checklist[c.id]).length;
+  document.getElementById("stats").innerHTML = left + `<span class="stat"><b>${done} из ${st.length}</b>мест отмечено</span><span class="stat"><b>${ck} из ${CHECKLIST.length}</b>в чек-листе</span>`;
+}
+function plural(n,a,b,c){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return c;if(n1>1&&n1<5)return b;if(n1===1)return a;return c;}
+
+function renderDays(){
+  const box=document.getElementById("days"); box.innerHTML="";
+  box.style.display = currentTab==="route" ? "flex":"none";
+  { const b=el("button",{class:"day-chip all",role:"listitem","aria-current":String(currentDay==="all"),"aria-label":"Вся поездка на карте"},`<span class="w">карта</span><span class="d">Вся поездка</span><span class="bar"></span>`);
+    b.addEventListener("click",()=>{ currentDay="all"; animDay=true; location.hash="all"; render(); window.scrollTo({top:0}); }); box.appendChild(b); }
+  DAYS.forEach(d=>{
+    const done=d.stops.filter(s=>P(s.id).done).length, pct=Math.round(done/d.stops.length*100);
+    const b=el("button",{class:"day-chip"+(d.concert?" concert":""),role:"listitem","aria-current":String(d.id===currentDay),"aria-label":d.date+", "+d.title},
+      `<span class="w">${d.concert?"концерт":d.wd}</span><span class="d">${esc(d.date)}</span><span class="bar"><i style="width:${pct}%"></i></span>`);
+    b.addEventListener("click",()=>{ currentDay=d.id; animDay=true; location.hash=d.id; render(); window.scrollTo({top:0}); });
+    box.appendChild(b);
+  });
+  const cur=box.querySelector('[aria-current="true"]'); if(cur) cur.scrollIntoView({block:"nearest",inline:"center"});
+}
+
+function mapSVG(day){
+  const pts=day.stops.filter(s=>isFinite(s.lat)).map((s,i)=>({...s,n:day.stops.indexOf(s)+1}));
+  const base=day.base; const all=[...pts]; const showBase = base && !pts.some(p=>Math.abs(p.lat-base.lat)<1e-4&&Math.abs(p.lng-base.lng)<1e-4);
+  if(showBase) all.push({lat:base.lat,lng:base.lng});
+  let minLa=Math.min(...all.map(p=>p.lat)), maxLa=Math.max(...all.map(p=>p.lat)), minLo=Math.min(...all.map(p=>p.lng)), maxLo=Math.max(...all.map(p=>p.lng));
+  const lat0=(minLa+maxLa)/2*Math.PI/180, k=Math.cos(lat0);
+  let w=(maxLo-minLo)*k, h=(maxLa-minLa); if(w<0.01)w=0.01; if(h<0.01)h=0.01;
+  const W=640,H=340,pad=34; const sc=Math.min((W-2*pad)/w,(H-2*pad)/h);
+  const ox=(W-w*sc)/2, oy=(H-h*sc)/2;
+  const X=lng=>ox+(lng-minLo)*k*sc, Y=lat=>oy+(maxLa-lat)*sc;
+  // scale bar
+  const kmPerPx = 111.32/sc; const nice=[0.2,0.5,1,2,5,10,20,50,100,200]; let km=nice[0]; for(const n of nice){ if(n/kmPerPx<=140) km=n; }
+  const barPx=km/kmPerPx;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Схема маршрута дня">`;
+  s+=`<defs><pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" class="m-grid"/></pattern></defs>`;
+  s+=`<rect width="${W}" height="${H}" rx="12" fill="url(#dots)"/>`;
+  if(pts.length>1){
+    s+=`<polyline points="${pts.map(p=>X(p.lng).toFixed(1)+","+Y(p.lat).toFixed(1)).join(" ")}" class="m-route" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/>`;
+  }
+  if(showBase){
+    const bx=X(base.lng), by=Y(base.lat);
+    s+=`<rect x="${bx-10}" y="${by-10}" width="20" height="20" rx="3" class="m-base" stroke-width="2"/><text x="${bx+16}" y="${by+5}" font-size="16" class="m-muted" font-family="Golos Text, sans-serif">${esc(base.name)}</text>`;
+  }
+  // draw points; offset identical positions
+  const seen={};
+  pts.forEach(p=>{
+    let x=X(p.lng), y=Y(p.lat); const key=Math.round(x/10)+":"+Math.round(y/10); seen[key]=(seen[key]||0)+1; if(seen[key]>1){ x+= (seen[key]-1)*28; }
+    const done=P(p.id).done;
+    s+=`<g><circle cx="${x}" cy="${y}" r="17" class="${done?"m-done":"m-dot"}"/><text x="${x}" y="${y+5.5}" text-anchor="middle" font-size="16" font-weight="700" class="${done?"m-donet":"m-dott"}" font-family="Golos Text, sans-serif">${p.n}</text></g>`;
+  });
+  s+=`<g transform="translate(${W-pad-barPx-4},${H-16})"><line x1="0" y1="0" x2="${barPx}" y2="0" class="m-ink" stroke-width="2"/><line x1="0" y1="-4" x2="0" y2="4" class="m-ink" stroke-width="2"/><line x1="${barPx}" y1="-4" x2="${barPx}" y2="4" class="m-ink" stroke-width="2"/><text x="${barPx/2}" y="-7" text-anchor="middle" font-size="15" class="m-muted" font-family="Golos Text, sans-serif">${km<1?km*1000+" м":km+" км"}</text></g>`;
+  s+=`<g transform="translate(${pad-14},${pad-10})"><text font-size="15" class="m-muted" font-family="Golos Text, sans-serif">С ↑</text></g>`;
+  s+=`</svg>`;
+  return s;
+}
+
+/* ---------- REAL MAP (OSM data via OpenFreeMap, drawn on canvas) ---------- */
+let GEO=null, GEO_P=null;
+function loadGeo(){
+  if(GEO_P) return GEO_P;
+  GEO_P = fetch("map.json").then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).then(j=>{
+    const dec=(str,prec)=>{ const f=10**prec; let i=0,lat=0,lng=0; const pts=[]; while(i<str.length){ let b,sh=0,res=0; do{ b=str.charCodeAt(i++)-63; res|=(b&0x1f)<<sh; sh+=5; }while(b>=0x20); lat+=(res&1)?~(res>>1):(res>>1); sh=0;res=0; do{ b=str.charCodeAt(i++)-63; res|=(b&0x1f)<<sh; sh+=5; }while(b>=0x20); lng+=(res&1)?~(res>>1):(res>>1); pts.push(lat/f,lng/f); } return pts; };
+    const out={};
+    for(const [k,arr] of Object.entries(j.layers)){ out[k]=arr.map(str=>{ const a=dec(str,j.precision); let mnla=90,mxla=-90,mnlo=180,mxlo=-180; for(let i=0;i<a.length;i+=2){ if(a[i]<mnla)mnla=a[i]; if(a[i]>mxla)mxla=a[i]; if(a[i+1]<mnlo)mnlo=a[i+1]; if(a[i+1]>mxlo)mxlo=a[i+1]; } return {a,b:[mnla,mxla,mnlo,mxlo]}; }); }
+    GEO=out; return out;
+  });
+  return GEO_P;
+}
+const MY=lat=>{ const r=lat*Math.PI/180; return Math.log(Math.tan(Math.PI/4+r/2))*180/Math.PI; };
+const viewByDay={};
+let XGEO=null, XGEO_P=null, curMap=null, geoWatch=null, myPos=null;
+function decPoly(str,prec){ const f=10**prec; let i=0,lat=0,lng=0; const pts=[]; while(i<str.length){ let b,sh=0,res=0; do{ b=str.charCodeAt(i++)-63; res|=(b&0x1f)<<sh; sh+=5; }while(b>=0x20); lat+=(res&1)?~(res>>1):(res>>1); sh=0;res=0; do{ b=str.charCodeAt(i++)-63; res|=(b&0x1f)<<sh; sh+=5; }while(b>=0x20); lng+=(res&1)?~(res>>1):(res>>1); pts.push(lat/f,lng/f); } return pts; }
+function bboxOf(a){ let mnla=90,mxla=-90,mnlo=180,mxlo=-180; for(let i=0;i<a.length;i+=2){ if(a[i]<mnla)mnla=a[i]; if(a[i]>mxla)mxla=a[i]; if(a[i+1]<mnlo)mnlo=a[i+1]; if(a[i+1]>mxlo)mxlo=a[i+1]; } return [mnla,mxla,mnlo,mxlo]; }
+function loadXGeo(){
+  if(XGEO_P) return XGEO_P;
+  XGEO_P=fetch("map_extra.json").then(r=>{ if(!r.ok) throw 0; return r.json(); }).then(j=>{
+    const F=(s,p)=>{ const a=decPoly(s,p); return {a,b:bboxOf(a)}; };
+    const rk={s:"mrt",l:"bts",m:"mono",r:"rail"};
+    XGEO={
+      rail:(j.bkk.rail||[]).map(([k,s])=>({k:rk[k]||"rail",...F(s,4)})),
+      st:(j.bkk.st||[]).filter(s=>s[0]),
+      pl:[...(j.bkk.pl||[]),...(j.pkt.pl||[])],
+      rn:[...(j.bkk.rn||[]),...(j.pkt.rn||[])],
+      w:(j.pkt.w||[]).map(s=>F(s,4)), m:(j.pkt.m||[]).map(s=>F(s,4)), p:(j.pkt.p||[]).map(s=>F(s,4))
+    }; return XGEO; }).catch(()=>null);
+  return XGEO_P;
+}
+/* route segments for a day, coloured by transport mode */
+function daySegments(day){
+  if(day.overview) return [];
+  const pts=day.stops.filter(s=>isFinite(s.lat)); const base=day.base; const segs=[];
+  const legs=LEGS[day.id]||[];
+  const at=i=> i===-1||i>=pts.length ? base : pts[i];
+  legs.forEach(l=>{ const a=at(l[0]), b=at(l[0]+1); if(!a||!b) return; if(Math.abs(a.lat-b.lat)+Math.abs(a.lng-b.lng)>1.2) return; if(Math.abs(a.lat-b.lat)+Math.abs(a.lng-b.lng)<1e-5) return; segs.push({a,b,mode:l[1],mins:l[3]}); });
+  for(let i=0;i<pts.length-1;i++){ if(!legs.some(l=>l[0]===i)){ const a=pts[i],b=pts[i+1]; if(Math.abs(a.lat-b.lat)+Math.abs(a.lng-b.lng)<1.2) segs.push({a,b,mode:"walk"}); } }
+  return segs;
+}
+function buildMap(host, day){
+  const wrap=el("div",{class:"rmap"});
+  const cv=el("canvas",{"aria-label":"Карта дня: улицы, метро и точки маршрута",role:"img"});
+  const ctr=el("div",{class:"rmap-ctl"},`<button class="btn" data-z="in" aria-label="Приблизить">+</button><button class="btn" data-z="out" aria-label="Отдалить">−</button><button class="btn" data-z="fit" aria-label="Показать весь день" title="Весь день"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="4" cy="11" r="2" fill="currentColor"/><circle cx="12" cy="5" r="2" fill="currentColor"/><path d="M5.5 9.5l5-3" stroke="currentColor" stroke-width="1.4" stroke-dasharray="2 1.6"/></svg></button><button class="btn" data-z="me" aria-label="Где я" title="Где я"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor"/><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></button><button class="btn" data-z="full" aria-label="Карта на весь экран" title="На весь экран"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M9.5 2H14v4.5M14 2l-5 5M6.5 14H2V9.5M2 14l5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>`);
+  const attr=el("div",{class:"rmap-attr"},"© участники OpenStreetMap, OpenFreeMap");
+  const load=el("div",{class:"rmap-load"},"Загружаю карту…");
+  const pop=el("div",{class:"rmap-pop",hidden:""});
+  const closeFull=el("button",{class:"btn rmap-close",hidden:""},"Закрыть карту");
+  wrap.append(cv,ctr,attr,load,pop,closeFull); host.prepend(wrap);
+  const pts=day.stops.map((s,i)=>({...s,n:i+1})).filter(s=>isFinite(s.lat));
+  const base=day.base;
+  const segs=daySegments(day);
+  let sel=null;
+  // fit: biggest cluster of the day's points
+  function cluster(){
+    const all=[...pts.map(p=>[p.lat,p.lng]), ...(base?[[base.lat,base.lng]]:[])];
+    let best=[];
+    all.forEach(c=>{ const g=all.filter(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<(day.overview?0.25:1.2)); if(g.length>best.length) best=g; });
+    return best.length?best:all;
+  }
+  function fitTo(list,padX,padY){
+    const W=wrap.clientWidth, H=wrap.clientHeight;
+    let x0=Math.min(...list.map(p=>p[1])), x1=Math.max(...list.map(p=>p[1])), y0=Math.min(...list.map(p=>MY(p[0]))), y1=Math.max(...list.map(p=>MY(p[0])));
+    const dx=Math.max(x1-x0,0.006), dy=Math.max(y1-y0,0.006);
+    const sc=Math.min((W-(padX??150))/dx,(H-(padY??90))/dy);
+    return {cx:(x0+x1)/2+20/sc, cy:(y0+y1)/2, sc};
+  }
+  const fit=()=>fitTo(cluster());
+  let v=null;
+  const ctx=cv.getContext("2d");
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let hits=[];
+  const isFull=()=>wrap.classList.contains("full");
+  const interactive=()=>isFull()||host.classList.contains("open");
+  function draw(){
+    const W=wrap.clientWidth, H=wrap.clientHeight, dpr=window.devicePixelRatio||1;
+    if(!W||!H) return;
+    if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){ cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); }
+    if(!v) v=viewByDay[day.id]||fit();
+    viewByDay[day.id]=v;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const C={land:css("--land"),water:css("--water"),rm:css("--road-m"),rw:css("--road-w"),rc:css("--road-case"),ink:css("--ink"),muted:css("--muted"),surf:css("--surface"),bg:css("--bg"),acc:css("--accent"),green:css("--green"),conc:css("--concert"),
+      rail:{bts:css("--rail-bts"),mrt:css("--rail-mrt"),mono:css("--rail-mono"),rail:css("--rail-rail")}};
+    ctx.fillStyle=C.land; ctx.fillRect(0,0,W,H);
+    const X=lng=>W/2+(lng-v.cx)*v.sc, Y=lat=>H/2-(MY(lat)-v.cy)*v.sc;
+    const lon0=v.cx-W/2/v.sc, lon1=v.cx+W/2/v.sc;
+    const inv=y=>Math.atan(Math.sinh(y*Math.PI/180))*180/Math.PI;
+    const lat0=inv(v.cy-H/2/v.sc), lat1=inv(v.cy+H/2/v.sc);
+    const vis=f=>!(f.b[1]<lat0||f.b[0]>lat1||f.b[3]<lon0||f.b[2]>lon1);
+    const inV=(la,lo)=>la>lat0&&la<lat1&&lo>lon0&&lo<lon1;
+    const path=a=>{ ctx.moveTo(X(a[1]),Y(a[0])); for(let i=2;i<a.length;i+=2) ctx.lineTo(X(a[i+1]),Y(a[i])); };
+    const z=v.sc; // px per degree; 1 km ≈ z/111
+    const stroke=(list,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); for(const f of list) if(vis(f)) path(f.a); ctx.stroke(); };
+    ctx.lineJoin="round"; ctx.lineCap="round";
+    // water
+    ctx.fillStyle=C.water; ctx.beginPath();
+    if(GEO) for(const f of GEO.w) if(vis(f)){ path(f.a); ctx.closePath(); }
+    ctx.fill();
+    if(XGEO){ ctx.beginPath(); for(const f of XGEO.w) if(vis(f)){ path(f.a); ctx.closePath(); } ctx.fill("evenodd"); }
+    if(GEO) stroke(GEO.r,C.water,z>6000?4:2.5);
+    // roads: casing then fill
+    const rS=[], rP=[], rM=[];
+    if(GEO){ rS.push(...GEO.s); rP.push(...GEO.p); rM.push(...GEO.m); }
+    if(XGEO){ rP.push(...XGEO.p); rM.push(...XGEO.m); }
+    const ws=z>20000?3:z>9000?1.8:1, wp=z>20000?5:z>9000?3:1.6, wm=z>20000?6.5:z>9000?4:2.4;
+    if(z>2500){ stroke(rS,C.rc,ws+1.4); }
+    stroke(rP,C.rc,wp+1.6); stroke(rM,C.rc,wm+1.8);
+    if(z>2500) stroke(rS,C.rw,ws);
+    stroke(rP,C.rw,wp); stroke(rM,C.rm,wm);
+    // rail lines
+    if(XGEO){ for(const k of ["rail","mrt","bts","mono"]){ const L=XGEO.rail.filter(r=>r.k===k); ctx.save(); if(k==="rail") ctx.setLineDash([6,4]); stroke(L,C.rail[k],z>9000?3.2:2); ctx.restore(); } }
+    // route segments by mode
+    for(const sg of segs){ const md=MODE[sg.mode]||MODE.walk; const x1=X(sg.a.lng),y1=Y(sg.a.lat),x2=X(sg.b.lng),y2=Y(sg.b.lat);
+      ctx.save(); ctx.strokeStyle=C.surf; ctx.lineWidth=6; ctx.globalAlpha=.7; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.strokeStyle=md[1]; ctx.lineWidth=sg.mode==="walk"?4.5:3.2; ctx.globalAlpha=sg.mode==="grab"||sg.mode==="taxi"||sg.mode==="car"?.8:1; if(sg.mode==="walk") ctx.setLineDash([1,7]); else if(sg.mode==="grab"||sg.mode==="taxi"||sg.mode==="car") ctx.setLineDash([10,6]); ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.restore();
+      // arrow in the middle
+      const mx=(x1+x2)/2, my=(y1+y2)/2, ang=Math.atan2(y2-y1,x2-x1); if(Math.hypot(x2-x1,y2-y1)>60){ ctx.save(); ctx.translate(mx,my); ctx.rotate(ang); ctx.fillStyle=md[1]; ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(-5,-5); ctx.lineTo(-5,5); ctx.closePath(); ctx.fill(); ctx.restore(); } }
+    // ---- labels with collision avoidance
+    const boxes=[]; const hitBox=(r)=>boxes.some(b=>!(r[0]+r[2]<b[0]||b[0]+b[2]<r[0]||r[1]+r[3]<b[1]||b[1]+b[3]<r[1]));
+    boxes.push([W-54,0,54,230]); boxes.push([0,H-18,230,18]);
+    // reserve markers
+    const seen={}; const mk=[];
+    pts.forEach(p=>{ let x=X(p.lng), y=Y(p.lat); const key=Math.round(x/16)+":"+Math.round(y/16); seen[key]=(seen[key]||0)+1; if(seen[key]>1 && !day.overview) x+=(seen[key]-1)*26; mk.push({p,x,y}); boxes.push([x-14,y-14,28,28]); });
+    let bx=null,by=null; const showBase = base && !pts.some(p=>Math.abs(p.lat-base.lat)<1e-4&&Math.abs(p.lng-base.lng)<1e-4);
+    if(showBase){ bx=X(base.lng); by=Y(base.lat); boxes.push([bx-11,by-11,22,22]); }
+    // marker labels (priority)
+    ctx.font="600 12.5px Golos Text, sans-serif";
+    const mlab=[];
+    const placeLabel=(txt,x,y,r)=>{ const tw=ctx.measureText(txt).width, th=16; const cand=[[x+r+5,y-th/2],[x-r-5-tw,y-th/2],[x-tw/2,y-r-4-th],[x-tw/2,y+r+4]]; for(const [lx,ly] of cand){ const R=[lx-2,ly-1,tw+4,th+2]; if(lx<2||ly<2||lx+tw>W-2||ly+th>H-2) continue; if(!hitBox(R)){ boxes.push(R); return [lx,ly+12]; } } return null; };
+    mk.forEach(m=>{ const nm=m.p.name.length>28?m.p.name.slice(0,27)+"…":m.p.name; const pos=placeLabel(nm,m.x,m.y,13); if(pos) mlab.push([nm,pos,m]); });
+    let blab=null; if(showBase){ ctx.font="700 12px Golos Text, sans-serif"; const nm=base.name; const pos=placeLabel(nm,bx,by,10); if(pos) blab=[nm,pos]; }
+    const halo=(txt,x,y,col,font,hw)=>{ ctx.font=font; ctx.lineWidth=hw||3.5; ctx.strokeStyle=C.land; ctx.lineJoin="round"; ctx.strokeText(txt,x,y); ctx.fillStyle=col; ctx.fillText(txt,x,y); };
+    // place names
+    if(XGEO && z>3000){
+      ctx.font="italic 500 12px Golos Text, sans-serif";
+      for(const p of XGEO.pl){ const [nm,la,lo,cls]=p; if(!inV(la,lo)) continue; const big=cls!=="q"; if(!big && z<14000) continue; const x=X(lo),y=Y(la); const tw=ctx.measureText(nm).width; const R=[x-tw/2-2,y-11,tw+4,15]; if(hitBox(R)) continue; boxes.push(R); halo(nm,x-tw/2,y,C.muted,"italic 500 12px Golos Text, sans-serif"); }
+    }
+    // stations
+    if(XGEO && z>7000){
+      for(const s of XGEO.st){ const [nm,la,lo,sub]=s; if(!inV(la,lo)) continue; const k={s:"metro",l:"metro",m:"mono",f:"boat",r:"rail"}[sub]||"rail"; const col=k==="boat"?"#2A9BB0":k==="metro"?C.ink:C.rail[k];
+        if(k==="boat" && z<20000) continue; const x=X(lo),y=Y(la);
+        ctx.beginPath(); ctx.arc(x,y,z>20000?5:3.6,0,6.283); ctx.fillStyle=C.surf; ctx.fill(); ctx.lineWidth=2.2; ctx.strokeStyle=col; ctx.stroke();
+        if(z>16000){ ctx.font="600 11px Golos Text, sans-serif"; const tw=ctx.measureText(nm).width; const R=[x+7,y-7,tw+3,14]; if(!hitBox(R)){ boxes.push(R); halo(nm,x+8,y+4,col,"600 11px Golos Text, sans-serif"); } } }
+    }
+    // road names
+    if(XGEO && z>26000){
+      for(const r of XGEO.rn){ const [nm,la,lo,ang]=r; if(!inV(la,lo)) continue; const x=X(lo),y=Y(la); ctx.font="500 10.5px Golos Text, sans-serif"; const tw=ctx.measureText(nm).width; let a=ang; if(a>Math.PI/2) a-=Math.PI; if(a<-Math.PI/2) a+=Math.PI; const R=[x-tw/2*Math.abs(Math.cos(a))-6,y-tw/2*Math.abs(Math.sin(a))-6,tw*Math.abs(Math.cos(a))+12,tw*Math.abs(Math.sin(a))+12]; if(hitBox(R)) continue; boxes.push(R); ctx.save(); ctx.translate(x,y); ctx.rotate(a); halo(nm,-tw/2,3.5,C.muted,"500 10.5px Golos Text, sans-serif",3); ctx.restore(); }
+    }
+    // base
+    if(showBase){ ctx.fillStyle=C.ink; ctx.beginPath(); ctx.roundRect?ctx.roundRect(bx-10,by-10,20,20,5):ctx.rect(bx-10,by-10,20,20); ctx.fill(); ctx.strokeStyle=C.surf; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle=C.bg; ctx.beginPath(); ctx.moveTo(bx,by-6); ctx.lineTo(bx+6,by); ctx.lineTo(bx+4,by); ctx.lineTo(bx+4,by+6); ctx.lineTo(bx-4,by+6); ctx.lineTo(bx-4,by); ctx.lineTo(bx-6,by); ctx.closePath(); ctx.fill();
+      if(blab) halo(blab[0],blab[1][0],blab[1][1],C.ink,"700 12px Golos Text, sans-serif"); }
+    // my position
+    if(myPos){ const x=X(myPos.lng), y=Y(myPos.lat); const r=Math.max(8,myPos.acc/111000*z); ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fillStyle="rgba(47,111,181,.15)"; ctx.fill(); ctx.beginPath(); ctx.arc(x,y,7,0,6.283); ctx.fillStyle="#2F6FB5"; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle="#fff"; ctx.stroke(); }
+    // markers
+    hits=[];
+    mk.forEach(m=>{ const {p,x,y}=m; const done=P(p.id).done; const isSel=sel===p.id; const r=isSel?16:13;
+      if(isSel){ ctx.beginPath(); ctx.arc(x,y,r+6,0,6.283); ctx.fillStyle=C.acc; ctx.globalAlpha=.3; ctx.fill(); ctx.globalAlpha=1; }
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=p.col?p.col:done?C.green:(p.cat==="concert"||/rajamangala/.test(p.id)?C.conc:C.ink); ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle=isSel?C.acc:C.surf; ctx.stroke();
+      ctx.fillStyle=done?"#fff":(/rajamangala/.test(p.id)?"#fff":C.bg); ctx.font="700 12.5px Golos Text, sans-serif"; ctx.textAlign="center"; ctx.fillStyle=p.col?"#fff":ctx.fillStyle; ctx.fillText(p.lbl?p.lbl:done?"✓":String(p.n),x,y+4.5); ctx.textAlign="start"; hits.push({x,y,id:p.id,r:r+4}); });
+    for(const [nm,[lx,ly],m] of mlab){ halo(nm,lx,ly,sel===m.p.id?C.acc:C.ink,"600 12.5px Golos Text, sans-serif",4); hits.push({x:lx,y:ly-5,w:ctx.measureText(nm).width,id:m.p.id,label:true}); }
+    // scale bar
+    const km=[0.1,0.2,0.5,1,2,5,10,20,50].find(k=>k*z/111*Math.cos(v.cy*Math.PI/180)>60)||50; const len=km*z/111*Math.cos(inv(v.cy)*Math.PI/180);
+    ctx.fillStyle=C.ink; ctx.fillRect(10,H-30,len,3); ctx.font="600 11px Golos Text, sans-serif"; halo(km<1?(km*1000)+" м":km+" км",10,H-36,C.ink,"600 11px Golos Text, sans-serif");
+  }
+  function showPop(id){
+    const s=pts.find(p=>p.id===id); if(!s){ pop.hidden=true; sel=null; draw(); return; }
+    sel=id; const done=P(id).done; const fee=FEES[id];
+    const leg=(LEGS[day.id]||[]).find(l=>l[0]===s.n-2); const md=leg?MODE[leg[1]]:null;
+    const km=(a1,o1,a2,o2)=>{ const R=6371,dl=(a2-a1)*Math.PI/180,dn=(o2-o1)*Math.PI/180; const h=Math.sin(dl/2)**2+Math.cos(a1*Math.PI/180)*Math.cos(a2*Math.PI/180)*Math.sin(dn/2)**2; return 2*R*Math.asin(Math.sqrt(h)); };
+    const fmtD=d=>d<1?Math.round(d*1000/10)*10+" м":d.toFixed(1).replace(".",",")+" км";
+    const walkMin=d=>Math.max(1,Math.round(d*1.3/4.5*60));
+    let near="";
+    if(XGEO){ let best=null; for(const st of XGEO.st){ if(st[3]==="f") continue; const d=km(s.lat,s.lng,st[1],st[2]); if(!best||d<best[0]) best=[d,st]; }
+      if(best && best[0]<2.5){ const t={s:"метро",l:"метро",m:"монорельс",r:"поезд"}[best[1][3]]||"станция"; near=`<div class="pop-fee">Ближайшая станция: ${esc(best[1][0])} (${t}), ${fmtD(best[0])}, ≈${walkMin(best[0])} мин пешком</div>`; } }
+    let fromMe="";
+    if(myPos){ const d=km(myPos.lat,myPos.lng,s.lat,s.lng); fromMe=`<div class="pop-fee"><b style="color:var(--ink)">От вас: ${fmtD(d)}</b>${d<3?`, ≈${walkMin(d)} мин пешком`:", удобнее на Grab или метро"}</div>`; }
+    pop.innerHTML=`<button class="pop-x" aria-label="Закрыть">×</button><div class="pop-h"><span class="pop-n${done?" done":""}"${s.col?` style="background:${s.col};color:#fff"`:""}>${s.lbl?s.lbl:done?"✓":s.n}</span><div><b>${esc(s.name)}</b><small>${esc([s.time,s.area].filter(Boolean).join(", "))}</small></div></div>${leg?`<div class="pop-leg"><i style="background:${md[1]}"></i>Сюда: ${esc(md[0])}${leg[3]?", "+esc(leg[3]):""}</div>`:""}${fee?`<div class="pop-fee">${esc(fee[1])}</div>`:""}${fromMe}${near}<div class="pop-act"><button class="btn primary" data-a="card">Открыть карточку</button><a class="btn" href="${gmaps(s.q)}" target="_blank" rel="noopener">Google Maps</a><button class="btn" data-a="drv">Таксисту</button></div>`;
+    pop.hidden=false; draw();
+    pop.querySelector(".pop-x").onclick=()=>{ pop.hidden=true; sel=null; draw(); };
+    pop.querySelector('[data-a="drv"]').onclick=()=>openDriver(s.name, TH[s.id], s.area, s.q);
+    pop.querySelector('[data-a="card"]').onclick=()=>{ if(day.overview&&s.dayId){ currentDay=s.dayId; location.hash=s.dayId; render(); setTimeout(()=>{ const c=document.getElementById("stop-"+id); if(c){ c.scrollIntoView({behavior:"auto",block:"start"}); c.classList.add("flash"); } },80); return; } if(isFull()) setFull(false); const c=document.getElementById("stop-"+id); if(c){ c.scrollIntoView({behavior:RM?"auto":"smooth",block:"start"}); c.classList.add("flash"); setTimeout(()=>c.classList.remove("flash"),1600); } };
+    if(!RM && window.Motion) mo(pop,{opacity:[0,1],y:[10,0]},{duration:0.2});
+  }
+  // fullscreen: move the map into <body> so fixed positioning is never trapped
+  let ph=null;
+  function setFull(on){
+    if(on===isFull()) return;
+    if(on){ ph=document.createComment("map"); wrap.replaceWith(ph); document.body.appendChild(wrap); wrap.classList.add("full"); closeFull.hidden=false; document.body.style.overflow="hidden"; }
+    else { wrap.classList.remove("full"); closeFull.hidden=true; if(ph){ ph.replaceWith(wrap); ph=null; } document.body.style.overflow=""; }
+    requestAnimationFrame(draw);
+  }
+  closeFull.addEventListener("click",()=>setFull(false));
+  wrap._close=()=>setFull(false);
+  // interaction
+  const ptrs=new Map(); let last=null, moved=false;
+  const zoomAt=(f,px,py)=>{ const W=wrap.clientWidth,H=wrap.clientHeight; const lx=v.cx+(px-W/2)/v.sc, ly=v.cy-(py-H/2)/v.sc; v.sc=Math.max(40,Math.min(400000,v.sc*f)); v.cx=lx-(px-W/2)/v.sc; v.cy=ly+(py-H/2)/v.sc; draw(); };
+  const touchLocked=e=>e.pointerType==="touch" && !interactive();
+  cv.addEventListener("pointerdown",e=>{ if(!touchLocked(e)) cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY}); moved=false; last=null; });
+  cv.addEventListener("pointermove",e=>{ if(!ptrs.has(e.pointerId)||touchLocked(e)) return; const prev=ptrs.get(e.pointerId); const cur={x:e.offsetX,y:e.offsetY};
+    if(ptrs.size===1){ const dx=cur.x-prev.x, dy=cur.y-prev.y; if(Math.abs(dx)+Math.abs(dy)>2) moved=true; v.cx-=dx/v.sc; v.cy+=dy/v.sc; ptrs.set(e.pointerId,cur); draw(); }
+    else { ptrs.set(e.pointerId,cur); const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(last) zoomAt(d/last,(a.x+b.x)/2,(a.y+b.y)/2); last=d; moved=true; } });
+  const up=e=>{ if(ptrs.size===1 && !moved){ const h=hits.find(h=>h.label? (e.offsetX>=h.x-3&&e.offsetX<=h.x+h.w+3&&Math.abs(e.offsetY-h.y)<11) : Math.hypot(h.x-e.offsetX,h.y-e.offsetY)<h.r);
+      if(h) showPop(h.id); else if(!interactive()){ host.querySelector("#mapToggle")?.click(); } else if(sel){ pop.hidden=true; sel=null; draw(); } }
+    ptrs.delete(e.pointerId); if(ptrs.size<2) last=null; };
+  cv.addEventListener("pointerup",up); cv.addEventListener("pointercancel",e=>{ptrs.delete(e.pointerId);last=null;});
+  cv.addEventListener("wheel",e=>{ e.preventDefault(); zoomAt(e.deltaY<0?1.25:0.8,e.offsetX,e.offsetY); },{passive:false});
+  cv.addEventListener("dblclick",e=>zoomAt(2,e.offsetX,e.offsetY));
+  ctr.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; const W=wrap.clientWidth,H=wrap.clientHeight; const z=b.dataset.z;
+    if(z==="in") zoomAt(1.6,W/2,H/2); else if(z==="out") zoomAt(1/1.6,W/2,H/2);
+    else if(z==="fit"){ v=fit(); draw(); }
+    else if(z==="full") setFull(!isFull());
+    else if(z==="me") locate(); });
+  function locate(){
+    if(!navigator.geolocation){ note("Браузер не умеет определять место"); return; }
+    note("Ищу, где вы…");
+    const ok=p=>{ myPos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy||50}; note(""); v.cx=myPos.lng; v.cy=MY(myPos.lat); if(v.sc<20000) v.sc=30000; draw(); };
+    const bad=err=>note(err&&err.code===1?"Нет доступа к геопозиции: разрешите его в настройках браузера":"Не получилось определить место");
+    try{ if(geoWatch==null) geoWatch=navigator.geolocation.watchPosition(p=>{ myPos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy||50}; draw(); },()=>{}, {enableHighAccuracy:true,maximumAge:15000}); navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:true,timeout:12000}); }catch(e){ bad(); }
+  }
+  let nt=null; function note(t){ load.textContent=t; load.hidden=!t; if(load.parentNode!==wrap) wrap.appendChild(load); clearTimeout(nt); if(t && !/Загружаю|Ищу/.test(t)) nt=setTimeout(()=>{load.hidden=true;},4000); }
+  if(window.ResizeObserver) new ResizeObserver(()=>draw()).observe(wrap);
+  requestAnimationFrame(draw);
+  Promise.all([loadGeo().catch(()=>null), loadXGeo()]).then(([g])=>{ if(g) note(""); else note("Улицы не загрузились, показаны только точки"); draw(); });
+  curMap={dayId:day.id, focus(id){ const s=pts.find(p=>p.id===id); if(!s) return; if(!interactive()) host.querySelector("#mapToggle")?.click(); setTimeout(()=>{ v.cx=s.lng; v.cy=MY(s.lat); if(v.sc<25000) v.sc=35000; showPop(id); },60); host.scrollIntoView({behavior:RM?"auto":"smooth",block:"start"}); }, redraw:draw};
+}
+
+
+function lightSea(cv){
+  const box=cv.parentElement; if(!box) return;
+  const dpr=window.devicePixelRatio||1; const W=box.clientWidth, H=box.clientHeight; cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr);
+  const N=Math.round(W*H/90); const dots=[];
+  for(let k=0;k<N;k++){ const y=Math.pow(Math.random(),0.7)*H; dots.push({x:Math.random()*W, y, r:0.6+1.6*(y/H), ph:Math.random()*6.28, sp:0.6+Math.random()*1.4, hue: Math.random()<0.85?270+Math.random()*20:45}); }
+  let last=0;
+  function frame(t){
+    if(!cv.isConnected) return;
+    if(t-last>48){ last=t;
+      ctx.clearRect(0,0,W,H);
+      for(const d of dots){ const a=RM?0.75:0.35+0.65*(0.5+0.5*Math.sin(d.ph+t/1000*d.sp)); ctx.fillStyle=`hsla(${d.hue},85%,${d.hue>100?72:60}%,${a})`; ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,6.283); ctx.fill(); }
+    }
+    if(!RM) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function directionsURL(day){
+  const q=day.stops.map(s=>s.q);
+  if(q.length<2) return gmaps(q[0]);
+  const u=new URL("https://www.google.com/maps/dir/");
+  u.searchParams.set("api","1"); u.searchParams.set("origin",q[0]); u.searchParams.set("destination",q[q.length-1]);
+  if(q.length>2) u.searchParams.set("waypoints",q.slice(1,-1).join("|"));
+  return u.toString();
+}
+
+function photoTile(aid){
+  const img=el("img",{src:"/_blob/"+aid,alt:"Фото места",loading:"lazy"});
+  img.addEventListener("error",()=>{img.style.visibility="hidden";});
+  img.addEventListener("click",()=>{ document.getElementById("lbImg").src=img.src; document.getElementById("lightbox").classList.add("open"); });
+  return img;
+}
+
+const ICON={
+ ticket:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 5.5V4h12v1.5a1.5 1.5 0 000 3V10H2V8.5a1.5 1.5 0 000-3z" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v5" stroke="currentColor" stroke-width="1.2" stroke-dasharray="1.2 1.3"/></svg>',
+ clock:'<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.2l2 1.3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+ alert:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.2l6 10.6H2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 6.5v3M8 11.2v.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+ pin:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14s4.5-4.2 4.5-7.5a4.5 4.5 0 00-9 0C3.5 9.8 8 14 8 14z" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6.5" r="1.5" fill="currentColor"/></svg>'
+};
+function stopCard(s,i,n,dayId){
+  const p=P(s.id);
+  const hasAfter=true;
+  const card=el("article",{class:"tl"+(p.done?" done":"")+(i===n-1&&!hasAfter?" last":""),id:"stop-"+s.id});
+  const time=el("div",{class:"tl-time"}); time.textContent=s.time||"";
+  const rail=el("div",{class:"tl-rail"},`<span class="tl-num">${i+1}</span>`);
+  const body=el("div",{class:"tl-body"});
+  const ph0=PHOTOS[s.id];
+  if(ph0){
+    const fig=el("figure",{class:"tl-photo"});
+    const im=el("img",{src:ph0.f,alt:s.name,loading:"lazy"});
+    im.addEventListener("error",()=>fig.remove());
+    im.addEventListener("click",()=>{ document.getElementById("lbImg").src=im.src; document.getElementById("lightbox").classList.add("open"); });
+    fig.appendChild(im);
+    if(ph0.u){ const cr=el("figcaption",{}); cr.innerHTML=`Фото: ${esc(ph0.a||"Wikimedia Commons")}${ph0.l?", "+esc(ph0.l):""}, <a href="${esc(ph0.u)}" target="_blank" rel="noopener">источник</a>`; fig.appendChild(cr); }
+    body.appendChild(fig);
+  }
+  const head=el("div",{class:"tl-head"});
+  head.innerHTML=`<h3>${esc(s.name)}</h3><div class="tl-area">${esc(s.area||"")}</div>`;
+  body.appendChild(head);
+  if(s.desc) body.appendChild(el("p",{class:"tl-desc"},esc(s.desc)));
+  // facts
+  const facts=[]; const fee=FEES[s.id]; const hh=HOURS[s.id];
+  if(hh){ const closed=!hh.d.includes(dayWd(dayId)); if(closed) facts.push(["alert","В этот день закрыто: "+hoursText(hh),"bad"]); else facts.push(["clock",hoursText(hh),""]); if(hh.chk) facts.push(["alert",hh.chk,"warn"]); }
+  if(fee){ const txt= fee[0]==="free"? fee[1] : fee[1]; facts.push(["ticket",txt, /запись|брони/.test(txt)&&fee[0]!=="spend"?"warn":(fee[0]==="free"?"good":"")]); }
+  if(facts.length){ const f=el("ul",{class:"facts"}); facts.forEach(([ic,t,tone])=>{ const li=el("li",{class:tone?"f-"+tone:""}); li.innerHTML=ICON[ic]+`<span>${esc(t)}</span>`; f.appendChild(li); }); body.appendChild(f); }
+  if(s.tip) body.appendChild(el("p",{class:"tl-tip"},esc(s.tip)));
+  // actions
+  const actions=el("div",{class:"tl-actions"});
+  const chk=el("button",{class:"check","aria-pressed":String(!!p.done)},p.done?"Снять отметку":"Отметить: были");
+  chk.addEventListener("click",()=>{ const q=P(s.id); q.done=!q.done; q.by=q.done?(ME||""):""; if(q.done) q.doneAt=bkkNow().toISOString().slice(0,10); state.places[s.id]=q; savePlace(s.id); lastToggled=q.done?s.id:null; render(); });
+  const map=el("a",{class:"lnk",href:gmaps(s.q),target:"_blank",rel:"noopener"},"Google Maps");
+  const pics=el("a",{class:"lnk",href:"https://www.google.com/search?tbm=isch&q="+encodeURIComponent(s.q),target:"_blank",rel:"noopener"},"Фото");
+  const drv=el("button",{class:"lnk"},"Таксисту");
+  drv.addEventListener("click",()=>openDriver(s.name, TH[s.id], s.area, s.q));
+  const onmap=el("button",{class:"lnk"},"На карте");
+  onmap.addEventListener("click",()=>{ if(curMap && curMap.dayId===dayId) curMap.focus(s.id); });
+  actions.append(chk,onmap,map,pics,drv);
+  body.appendChild(actions);
+  // note
+  const ta=el("textarea",{class:"note",id:"note-"+s.id,rows:"1",placeholder:"Заметка: что понравилось, что заказать…","aria-label":"Заметка к месту "+s.name});
+  ta.value=p.note||"";
+  const saved=el("div",{class:"saved"});
+  let t=null;
+  ta.addEventListener("focus",()=>editing.add(s.id));
+  ta.addEventListener("input",()=>{ clearTimeout(t); saved.textContent="…"; t=setTimeout(async()=>{ const q=P(s.id); q.note=ta.value; state.places[s.id]=q; await savePlace(s.id); saved.textContent= mode==="db"?"Сохранено на этом телефоне":"Сохранено на этом устройстве"; },900); });
+  ta.addEventListener("blur",async()=>{ clearTimeout(t); const q=P(s.id); if(q.note!==ta.value){ q.note=ta.value; state.places[s.id]=q; await savePlace(s.id); saved.textContent= mode==="db"?"Сохранено на этом телефоне":"Сохранено на этом устройстве"; } editing.delete(s.id); });
+  body.append(ta,saved);
+  const ph=el("div",{class:"photos"});
+  (p.photos||[]).forEach(a=>ph.appendChild(photoTile(a)));
+  if(assets){
+    const lab=el("label",{class:"addphoto"},`<span>+ фото</span>`);
+    const inp=el("input",{type:"file",accept:"image/*","aria-label":"Добавить фото к месту "+s.name});
+    inp.addEventListener("change",async()=>{
+      const f=inp.files&&inp.files[0]; if(!f) return;
+      lab.querySelector("span").textContent="загрузка…";
+      try{ const blob=await shrink(f); const r=await assets.upload(blob,{type:blob.type||"image/jpeg"});
+        const q=P(s.id); q.photos=[...(q.photos||[]), r.id]; state.places[s.id]=q; await savePlace(s.id); render();
+      }catch(e){ lab.querySelector("span").textContent = (e&&e.code==="too_large")?"слишком большое":"не вышло"; }
+    });
+    lab.appendChild(inp); ph.appendChild(lab);
+  }
+  if(ph.childNodes.length) body.appendChild(ph);
+  if(p.done){ const dt=p.doneAt? new Date(p.doneAt+"T00:00:00Z") : dayDate(dayId); const st=el("div",{class:"stamp","aria-label":"Отмечено: были"},`<span>Были</span><small>${dt.getUTCDate()}.${String(dt.getUTCMonth()+1).padStart(2,"0")}${p.by?" · "+esc(p.by):""}</small>`); body.appendChild(st); }
+  card.append(time,rail,body);
+  return card;
+}
+
+async function shrink(file){
+  try{
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
+    const bmp=await createImageBitmap(file); const max=1600; const r=Math.min(1,max/Math.max(bmp.width,bmp.height));
+    if(r===1 && file.size<2.5e6) return file;
+    const c=document.createElement("canvas"); c.width=Math.round(bmp.width*r); c.height=Math.round(bmp.height*r);
+    c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+    return await new Promise(res=>c.toBlob(b=>res(b||file),"image/jpeg",0.85));
+  }catch(e){ return file; }
+}
+
+function renderRoute(){
+  const m=document.getElementById("route"); m.innerHTML="";
+  if(currentDay==="all"){ renderOverview(m); return; }
+  const d=DAYS.find(x=>x.id===currentDay)||DAYS[0];
+  if(!ME) m.appendChild(whoPicker(false));
+  const tid=todayId();
+  if(tid){ const td=DAYS.find(x=>x.id===tid); const nxt=td.stops.find(x=>!P(x.id).done);
+    const tb=el("section",{class:"today"});
+    if(tid!==d.id){ tb.innerHTML=`<div class="t-row"><b>Сегодня ${esc(td.date)}: ${esc(td.title)}</b></div>`; const go=el("button",{class:"btn primary"},"Открыть сегодняшний день"); go.addEventListener("click",()=>{currentDay=tid;animDay=true;location.hash=tid;render();}); tb.appendChild(go); }
+    else if(nxt){ const np=nowPlan(td); const b=bkkNow(); const nowMin=b.getUTCHours()*60+b.getUTCMinutes();
+      let when=""; if(np&&np.leave!=null){ const diff=np.leave-nowMin; when = diff<=0 ? `<span class="now-go">Пора выходить</span>` : `<span class="now-at">Выйти в ${hhmm(np.leave)} · через ${diff>=60?Math.floor(diff/60)+" ч "+(diff%60)+" мин":diff+" мин"}</span>`; }
+      const lg=np&&np.leg?np.leg:null; const md=lg?MODE[lg[1]]:null; const pp=lg?legPP(lg):null;
+      tb.innerHTML=`<div class="t-lbl">Сейчас · дальше по плану</div><div class="t-row"><b>${esc(nxt.name)}</b><span>${esc(nxt.time||"")}${nxt.area?", "+esc(nxt.area):""}</span></div>${when}${lg?`<div class="now-leg"><i style="background:${md[1]}"></i><span><b>${esc(md[0])}</b>${lg[3]?" · "+esc(lg[3]):""}${pp&&pp[1]?" · ≈"+pp[0]+"–"+pp[1]+" ฿ с человека":""}</span><small>${esc(lg[2])}</small></div>`:""}`;
+      const acts=el("div",{class:"actions"});
+      const r=el("a",{class:"btn primary",href:"https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(nxt.q),target:"_blank",rel:"noopener"},"Маршрут туда");
+      const t=el("button",{class:"btn"},"Таксисту"); t.addEventListener("click",()=>openDriver(nxt.name,TH[nxt.id],nxt.area,nxt.q));
+      const dn=el("button",{class:"btn"},"Уже были"); dn.addEventListener("click",()=>{const q=P(nxt.id); q.done=true; state.places[nxt.id]=q; savePlace(nxt.id); render();});
+      const sc=el("button",{class:"btn"},"К карточке"); sc.addEventListener("click",()=>{const c=document.getElementById("stop-"+nxt.id); if(c) c.scrollIntoView({behavior:"smooth"});});
+      acts.append(r,t,dn,sc); tb.appendChild(acts); }
+    else { tb.innerHTML=`<div class="t-row"><b>На сегодня всё отмечено. Отличный день!</b></div>`; }
+    m.appendChild(tb); }
+  const concertAfter = d.concert;
+  if(d.concert){ const hero=el("div",{class:"lights"}); const cv=el("canvas",{"aria-hidden":"true"}); hero.append(cv); hero.insertAdjacentHTML("beforeend",`<div class="lights-txt"><b>BTS «ARIRANG»</b><span>Rajamangala National Stadium, ${esc(d.date)}</span></div>`); m.appendChild(hero); requestAnimationFrame(()=>lightSea(cv)); }
+  const head=el("section",{class:"dayhead"});
+  head.innerHTML=`<div class="when"><span>${esc(d.date)}, ${esc(d.wd)}</span><span class="pill city">${esc(d.city)}</span>${d.concert?'<span class="pill concert">Концерт BTS</span>':""}</div><h2>${esc(d.title)}</h2><p>${esc(d.lead)}</p>${(()=>{const t=d.stops.reduce((a,x)=>a+((FEES[x.id]&&FEES[x.id][2])||0),0); const [tl,th]=dayTransport(d.id); const [fl,fh]=dayFood(d.id); const f=n=>n.toLocaleString("ru-RU");
+    return `<dl class="daycost"><div><dt>Входы</dt><dd>${t?"от ≈"+f(t)+" ฿":"бесплатно"}</dd></div><div><dt>Транспорт</dt><dd>${th?"≈"+f(tl)+"–"+f(th)+" ฿":"входит в экскурсию"}</dd></div><div><dt>Еда</dt><dd>≈${f(fl)}–${f(fh)} ฿</dd></div><div class="tot"><dt>Итого на человека</dt><dd>≈${f(t+tl+fl)}–${f(t+th+fh)} ฿</dd></div></dl><p class="dc-note">Без покупок, экскурсий и авиабилетов. Такси и Grab поделены на четверых.</p>`;})()}`;
+  m.appendChild(head);
+  if(concertAfter) m.appendChild(concertCard(d));
+  const mc=el("div",{class:"mapcard"+(mapOpen?" open":"")});
+  mc.innerHTML=`<div class="mapfoot"><button class="btn" id="mapToggle" aria-expanded="${mapOpen}">${mapOpen?"Свернуть":"Развернуть"}</button><a class="btn primary" href="${directionsURL(d)}" target="_blank" rel="noopener">Google Maps</a></div>`;
+  m.appendChild(mc);
+  buildMap(mc,d);
+  { const modes=[...new Set((LEGS[d.id]||[]).map(l=>l[1]))].filter(k=>MODE[k]);
+    const lg=el("div",{class:"maplegend"});
+    lg.innerHTML=`<span><i class="pin"></i>Места дня по порядку</span><span><i class="home"></i>Жильё</span>`+modes.map(k=>`<span style="color:${MODE[k][1]}"><i class="${k==="walk"?"dot":(/grab|taxi|car/.test(k)?"dash":"")}"></i><b style="color:var(--muted);font-weight:400">${esc(MODE[k][0])}</b></span>`).join("")+(d.base===HOTEL_BKK?`<span style="color:var(--rail-mrt)"><i></i><b style="color:var(--muted);font-weight:400">Линии BTS и MRT</b></span><span><i class="st"></i>Станции</span>`:"");
+    mc.insertBefore(lg, mc.querySelector(".mapfoot"));
+    const hint=el("div",{class:"maphint"},"Нажмите на место, чтобы увидеть детали и ближайшую станцию.");
+    mc.insertBefore(hint, mc.querySelector(".mapfoot")); }
+  mc.querySelector("#mapToggle").addEventListener("click",e=>{ mapOpen=!mapOpen; mc.classList.toggle("open",mapOpen); e.currentTarget.textContent=mapOpen?"Свернуть":"Развернуть"; e.currentTarget.setAttribute("aria-expanded",String(mapOpen)); });
+  const list=el("div",{class:"timeline"});
+  const legs=LEGS[d.id]||[];
+  const meals=MEALS[d.id]||[];
+  meals.filter(m=>m[0]===-1).forEach(m=>list.appendChild(mealRow(m)));
+  legs.filter(l=>l[0]===-1).forEach(l=>list.appendChild(legRow(l)));
+  d.stops.forEach((s,i)=>{ list.appendChild(stopCard(s,i,d.stops.length,d.id));
+    meals.filter(m=>m[0]===i).forEach(m=>list.appendChild(mealRow(m)));
+    legs.filter(l=>l[0]===i).forEach(l=>list.appendChild(legRow(l)));
+    meals.filter(m=>m[0]===i+0.5).forEach(m=>list.appendChild(mealRow(m))); });
+  list.appendChild(snackRow(d.id));
+  m.appendChild(list);
+  // ideas
+  const ex=el("section",{class:"extras"});
+  ex.innerHTML=`<h3>Копилка идей без дня</h3><p>Места без точного адреса или подходящего дня. Сердечком голосуйте за то, куда хотите. Самые желанные поднимаются наверх.</p>`;
+  const vc=id=>Object.values(state.votes[id]||{}).filter(Boolean).length;
+  [...IDEAS].sort((a,b)=>vc(b.id)-vc(a.id)).forEach(it=>{
+    const p=P(it.id);
+    const row=el("div",{class:"idea"});
+    const b=el("button",{class:"check","aria-pressed":String(!!p.done),"aria-label":"Отметить: "+it.t},`<span class="box">${p.done?"✓":""}</span>`);
+    b.addEventListener("click",()=>{ const q=P(it.id); q.done=!q.done; state.places[it.id]=q; savePlace(it.id); render(); });
+    const g=el("div",{class:"grow"},`<div class="t">${esc(it.t)}</div><div class="s">${esc(it.s)}</div>`);
+    const [vb,names]=voteBtn(it.id); if(names.length) g.insertAdjacentHTML("beforeend",`<div class="s vote-names">Хотят: ${names.map(esc).join(", ")}</div>`);
+    row.append(b,g,vb); ex.appendChild(row);
+  });
+  m.appendChild(ex);
+}
+
+
+let sQuery="", sFilters=new Set();
+const FILTERS=[["free","Бесплатно"],["food","Еда и кофе"],["temple","Храмы"],["shop","Шопинг и рынки"],["art","Искусство"],["open","Открыто сейчас"]];
+function matchFilter(s,f){ const fee=FEES[s.id];
+  if(f==="free") return fee&&fee[0]==="free";
+  if(f==="food") return ["food","bar","spa"].includes(s.cat);
+  if(f==="temple") return s.cat==="temple";
+  if(f==="shop") return ["shop","market"].includes(s.cat);
+  if(f==="art") return s.cat==="art";
+  if(f==="open") return openNow(HOURS[s.id])===true;
+  return true; }
+function renderSearch(){
+  const m=document.getElementById("search"); m.innerHTML="";
+  const box=el("section",{class:"sbox"});
+  const inp=el("input",{type:"search",id:"sq",placeholder:"Название, район, что хочется…","aria-label":"Поиск по местам"}); inp.value=sQuery;
+  const chips=el("div",{class:"chips"});
+  FILTERS.forEach(([k,l])=>{ const b=el("button",{class:"chip","aria-pressed":String(sFilters.has(k))},l); b.addEventListener("click",()=>{ sFilters.has(k)?sFilters.delete(k):sFilters.add(k); renderSearch(); }); chips.appendChild(b); });
+  box.append(inp,chips); m.appendChild(box);
+  const list=el("div",{class:"slist"}); m.appendChild(list);
+  const seen=new Set();
+  const draw=()=>{ list.innerHTML=""; const q=sQuery.trim().toLowerCase(); let n=0;
+    DAYS.forEach(d=>d.stops.forEach(s=>{ if(["plane","stay"].includes(s.cat)) return;
+      const key=s.q+d.id; if(seen.has(key)) return;
+      const hay=(s.name+" "+(s.area||"")+" "+(s.desc||"")+" "+(TH[s.id]||"")+" "+d.city).toLowerCase();
+      if(q && !hay.includes(q)) return; for(const f of sFilters) if(!matchFilter(s,f)) return;
+      n++; const fee=FEES[s.id]; const h=HOURS[s.id]; const on=openNow(h); const closedDay=h&&!h.d.includes(dayWd(d.id));
+      const row=el("button",{class:"srow"});
+      row.innerHTML=`<span class="s-day">${esc(d.date)}</span><span class="s-main"><b>${esc(s.name)}</b><span>${esc(s.area||"")}${fee?" · "+esc(fee[1]):""}</span>${h?`<span class="${closedDay?"s-bad":""}">${closedDay?"В день по плану закрыто · ":""}${esc(hoursText(h))}${on===true?" · сейчас открыто":on===false?" · сейчас закрыто":""}</span>`:""}</span>`;
+      row.addEventListener("click",()=>{ currentTab="route"; currentDay=d.id; location.hash=d.id; render(); setTimeout(()=>{const c=document.getElementById("stop-"+s.id); if(c) c.scrollIntoView({behavior:"smooth",block:"start"});},60); });
+      list.appendChild(row); }));
+    IDEAS.forEach(it=>{ const hay=(it.t+" "+it.s).toLowerCase(); if(q&&!hay.includes(q)) return; if(sFilters.size) return; n++; const row=el("div",{class:"srow idea-row"}); row.innerHTML=`<span class="s-day">идея</span><span class="s-main"><b>${esc(it.t)}</b><span>${esc(it.s)}</span></span>`; list.appendChild(row); });
+    if(!n) list.innerHTML=`<p class="empty">Ничего не нашлось. Попробуйте другое слово или снимите фильтр.</p>`; };
+  inp.addEventListener("input",()=>{ sQuery=inp.value; draw(); });
+  draw();
+}
+
+function renderInfo(){
+  const m=document.getElementById("info");
+  m.innerHTML=`<div class="memo">
+  <div class="mcard sos-card" id="sos"><h2>Экстренные контакты</h2>
+   <div class="sos-grid">
+    <div><b>1155</b><span>Туристическая полиция, говорят по-английски, круглосуточно</span></div>
+    <div><b>1669</b><span>Скорая помощь (государственная)</span></div>
+    <div><b>191</b><span>Полиция и все экстренные службы</span></div>
+    <div><b>199</b><span>Пожарные</span></div>
+   </div>
+   <ul>
+    <li><b>Посольство России в Бангкоке</b>: 78 Sap Rd, Bang Rak (недалеко от отеля). Тел. +66 2 234 9824. Консульский отдел +66 2 234 2012. <b>Дежурный телефон для экстренных случаев: +66 90 403 3645.</b></li>
+    <li><b>Генконсульство России на Пхукете</b>: 63/501 Moo 2, Thepkasattri Rd, Ko Kaeo. Тел. +66 95 259 8081.</li>
+    <li><b>Больница в Бангкоке рядом с отелем</b>: BNH Hospital (โรงพยาบาลบีเอ็นเอช), 9/1 Convent Rd, Silom. Приёмный покой 24/7, тел. +66 2 632 1000.</li>
+    <li><b>Больница на Пхукете</b>: Bangkok Hospital Phuket (โรงพยาบาลกรุงเทพภูเก็ต), 2/1 Hongyok Utis Rd. Тел. +66 76 254 425, частная скорая — 1719.</li>
+    <li>Страховки и номера полисов держите в почте и офлайн на телефоне. При обращении в больницу сначала звоните в страховую.</li>
+   </ul>
+   <div class="actions"><button class="btn" id="sosHome">Показать адрес отеля водителю</button></div>
+  </div>
+
+  ${docsCard()}
+  <div id="packSlot"></div>
+  <div class="mcard"><h2>Разговорник</h2><p class="cp-note" style="margin-top:-4px">Нажмите на фразу, чтобы показать её крупно, или на динамик, чтобы телефон произнёс её по-тайски.</p><div class="phr" id="phr"></div>
+   <p style="margin-top:8px;color:var(--muted);font-size:13px">«ค่ะ / คะ» (кха) — вежливое окончание, которое говорят женщины.</p></div>
+
+  <div class="mcard alert"><h2>Самое важное</h2><ul>
+    <li><b>TDAC</b>: электронная карта прибытия, обязательна для всех. Бесплатно, на <a href="https://tdac.immigration.go.th" target="_blank" rel="noopener">tdac.immigration.go.th</a>, не раньше чем за 72 часа до прилёта. Для прилёта 28 ноября — с 25 ноября.</li>
+    <li><b>Без визы 30 дней</b>: с 15 сентября 2026 срок для россиян сократили с 60 до 30 дней. Двух недель хватает.</li>
+    <li><b>Электронные сигареты</b> в Таиланде запрещены: ввоз, хранение и использование.</li>
+    <li><b>Ночь 11–12 декабря</b>: прилёт с Пхукета в 23:35, вылет MU548 в 01:55 из того же аэропорта. Это два разных билета: если PG280 задержат, China Eastern ждать не будет. Летите с Пхукета как можно легче и зарегистрируйтесь на MU548 онлайн.</li>
+  </ul></div>
+
+  <div class="mcard" id="transport"><h2>Транспорт: что когда брать и как платить</h2>
+   <p><b>Главное правило.</b> Вчетвером Grab или такси по счётчику на короткие расстояния часто выходит дешевле или так же, как четыре билета на метро, и сильно удобнее. Метро и BTS выигрывают в час пик (7:00–9:30 и 16:30–19:30), когда дороги стоят, и там, где место прямо у станции. К местам вдали от линий (Golden Mount, Chang Chui, MOCA, Wat Samphran) и ночью — только Grab или такси.</p>
+   <ul>
+    <li><b>BTS (надземка)</b>: 17–47 ฿ за поездку, до 65 ฿ на дальние участки. Банковские карты на турникетах в основном не принимают: покупайте разовый билет в автомате за наличные (монеты и мелкие купюры, размен в кассе) или Rabbit card (оформляют по паспорту).</li>
+    <li><b>MRT (метро)</b>: 17–44 ฿. С июня 2026 на турникетах принимают бесконтактные Visa и Mastercard иностранных банков. Российские карты не подойдут — тогда разовый жетон в автомате за наличные.</li>
+    <li><b>Airport Rail Link</b>: от аэропорта Суварнабхуми до центра и к стадиону (станции Ramkhamhaeng и Hua Mak). Жетон в автомате, наличные.</li>
+    <li><b>Речной паром</b>: через реку от Tha Tien к Wat Arun — несколько бат. Экспресс-лодка с оранжевым флагом — 18 ฿ по всему маршруту. Платите наличными на пристани или на борту.</li>
+    <li><b>Grab и Bolt</b>: поставьте оба до вылета, зарегистрируйтесь по номеру телефона (нужен приём SMS). Способ оплаты — «Наличные», если нет иностранной карты. Цена фиксируется при заказе. Bolt обычно дешевле, Grab надёжнее в аэропортах. Для четверых с чемоданами — GrabCar XL.</li>
+    <li><b>Такси по счётчику</b>: посадка 35 ฿, дальше около 6,5 ฿ за км. Скажите «เปิดมิเตอร์ค่ะ» (пэт митэ кха). Если водитель отказывается включать счётчик и называет фиксированную цену — выходите и ловите следующее.</li>
+    <li><b>Тук-туки</b>: для туристов дорогие, торгуйтесь заранее. Скорее аттракцион, чем транспорт.</li>
+    <li><b>Пхукет</b>: метро нет, удобно только Grab и Bolt. Из аэропорта в Карон обычно 800–1100 ฿ за машину. На день поездок по острову выгоднее машина с водителем.</li>
+   </ul>
+   <p style="color:var(--muted);font-size:13px">Цены — ориентир на ноябрь 2026. В приложениях такси цена растёт вечером, в дождь и после концертов.</p></div>
+
+  <div class="mcard" id="food"><h2>Еда: сколько стоит и как платить</h2>
+   <p>В маршруте у каждого дня отмечены завтрак, обед и ужин с примерной ценой на человека. Эти суммы вошли в расходы дня.</p>
+   <ul>
+    <li><b>Уличная еда</b>: блюдо 50–100 ฿, в туристических местах до 100–180 ฿. Платите наличными, держите мелкие купюры.</li>
+    <li><b>Фуд-корты и фуд-холлы в торговых центрах</b>: 80–300 ฿ за блюдо, с кондиционером и чисто. Во многих сначала кладёте деньги на карту фуд-корта на кассе, а остаток возвращают в тот же день.</li>
+    <li><b>Кафе и рестораны среднего уровня</b>: 200–600 ฿ на человека. К счёту часто добавляют 10% за обслуживание и 7% налога, это указано мелким шрифтом в меню.</li>
+    <li><b>Кофе</b>: 80–180 ฿. <b>Коктейль в баре на крыше</b>: 400–1200 ฿.</li>
+    <li><b>Вода</b>: пейте только бутилированную, в 7-Eleven она стоит 7–15 ฿. Лёд в кафе обычно делают из фильтрованной воды.</li>
+    <li><b>Пхукет</b>: еда в среднем дороже, чем в Бангкоке, особенно у пляжа.</li>
+   </ul>
+   <p id="tripTotal"></p>
+   <p style="color:var(--muted);font-size:13px">Цены — ориентир на 2026 год, без покупок, экскурсий, спа, концертов и авиабилетов.</p></div>
+
+  <div class="mcard"><h2>Концертные дни: 3 и 6 декабря</h2><ul>
+    <li>Rajamangala National Stadium, район Хуамак (Бангкапи), восток города. Из Сатхона в будний вечер дорога легко займёт больше часа.</li>
+    <li>Выезжайте заранее: очереди на вход и мерч. Время начала проверьте по билету.</li>
+    <li>Возьмите загранпаспорт и проверьте в билете или у организатора, нужно ли совпадение имени.</li>
+    <li>После шоу такси и Grab будут дорогими и подаются долго. Договоритесь о точке встречи, если потеряетесь, и держите телефоны заряженными: пауэрбанк обязательно.</li>
+  </ul></div>
+
+  <div class="mcard"><h2>Деньги и связь</h2><ul>
+    <li>Цены на входы в карточках — на ноябрь 2026 года, для иностранцев, за одного человека. В храмах часто принимают только наличные.</li>
+    <li>Российские карты в Таиланде не работают. Берите наличные доллары или евро в хорошем состоянии и меняйте в городских обменниках (у SuperRich обычно лучший курс), а не в аэропорту.</li>
+    <li>Связь: eSIM до вылета или местная SIM в аэропорту (AIS, TrueMove, dtac). Интернет нужен для Grab и карт.</li>
+    <li>Приложения: Grab и Bolt для такси, Google Maps для метро и BTS.</li>
+  </ul></div>
+
+  <div class="mcard"><h2>Храмы и этикет</h2><ul>
+    <li>В храмы и Большой дворец: закрытые плечи и колени. Удобно возить лёгкий шарф или накидку.</li>
+    <li>Обувь снимают перед входом в здания храма.</li>
+    <li>Не трогать голову людей, не направлять ступни на статуи Будды и монахов, женщинам не касаться монахов.</li>
+    <li>О королевской семье — только уважительно, это закон.</li>
+  </ul></div>
+
+  <div class="mcard"><h2>Безопасность и бытовое</h2><ul>
+    <li>Классический развод: «дворец сегодня закрыт, отвезу в другое место». Не соглашайтесь, идите ко входу сами.</li>
+    <li>Туристическая полиция: <b>1155</b> (есть английский).</li>
+    <li>Воду из-под крана не пить. Солнцезащитный крем и вода с собой каждый день.</li>
+    <li>5 декабря национальный праздник: людей больше, часть госучреждений закрыта.</li>
+    <li>Пхукет в декабре: сухой сезон, на западном побережье обычно спокойное море. Для планктона нужна тёмная ночь, без ярких фонарей.</li>
+  </ul></div>
+
+  <div class="mcard"><h2>Чек-лист перед поездкой</h2><div class="cl" id="checklist"></div></div>
+  </div>`;
+  const ph=m.querySelector("#phr");
+  PHRASES.forEach(([ru,th,tr])=>{ const b=el("button",{class:"phr-row"}); b.innerHTML=`<span class="p-ru">${esc(ru)}</span><span class="p-th">${esc(th)}</span><span class="p-tr">${esc(tr)}</span>`; b.addEventListener("click",()=>{ const o=document.getElementById("driver"); o.querySelector(".dr-please").textContent=""; openDriver(ru, th, tr, null); o.querySelector(".dr-map").style.display="none"; }); const wrapP=el("div",{class:"phr-item"}); const sp=el("button",{class:"speak","aria-label":"Произнести: "+ru},'<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 8v4h3l4 3.5V4.5L6 8z" fill="currentColor"/><path d="M13 7.2a4 4 0 010 5.6M15.2 5a7 7 0 010 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'); sp.addEventListener("click",()=>speakTh(th,null)); wrapP.append(b,sp); ph.appendChild(wrapP); });
+  m.querySelector("#sosHome").addEventListener("click",showHome);
+  m.querySelector("#packSlot").replaceWith(packingCard());
+  m.querySelectorAll("[data-drv]").forEach(b=>b.addEventListener("click",()=>{ const k=b.dataset.drv; if(k==="bkk") openDriver(HOME_BKK.ru, HOME_BKK.th, HOME_BKK.addr, "JC Kevin Sathorn Bangkok Hotel"); else openDriver("Rajamangala National Stadium","ราชมังคลากีฬาสถาน","286 ถนนรามคำแหง หัวหมาก บางกะปิ","Rajamangala National Stadium"); }));
+  const cl=m.querySelector("#checklist");
+  CHECKLIST.forEach(c=>{
+    const lab=el("label",{for:"ck-"+c.id});
+    const inp=el("input",{type:"checkbox",id:"ck-"+c.id}); inp.checked=!!state.checklist[c.id];
+    inp.addEventListener("change",()=>{ state.checklist[c.id]=inp.checked; saveChecklist(); renderStats(); });
+    const sp=el("span",{},`${esc(c.t)}<br><span class="when">${esc(c.w)}</span>`);
+    lab.append(inp,sp); cl.appendChild(lab);
+  });
+}
+
+function render(){
+  renderStats(); renderDays();
+  const r=document.getElementById("route"), i=document.getElementById("info"), se=document.getElementById("search"), mn=document.getElementById("money");
+  mn.hidden=currentTab!=="money";
+  ["route","money","search","info"].forEach(t=>document.getElementById("tab-"+t).setAttribute("aria-selected",String(currentTab===t)));
+  document.querySelectorAll(".bottombar button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.tab===currentTab)));
+  r.hidden=currentTab!=="route"; i.hidden=currentTab!=="info"; se.hidden=currentTab!=="search";
+  if(currentTab==="route") renderRoute(); else if(currentTab==="info") renderInfo(); else if(currentTab==="money") renderMoney(); else renderSearch();
+  afterRender();
+}
+function afterRender(){
+  if(firstPaint){ firstPaint=false;
+    mo(document.getElementById("ticket"),{opacity:[0,1],y:[18,0]},{type:"spring",bounce:0.28,duration:0.7});
+    mo(document.querySelectorAll(".day-chip"),{opacity:[0,1],y:[10,0]},{delay:stg(0.035,{startDelay:0.18}),duration:0.32});
+  } else if(animDay){
+    const parts=[...document.querySelectorAll("#"+currentTab+" > *")].slice(0,4);
+    mo(parts,{opacity:[0,1],y:[10,0]},{delay:stg(0.05),duration:0.3});
+  }
+  animDay=false;
+  if(lastToggled){ const st=document.querySelector("#stop-"+lastToggled+" .stamp"); mo(st,{opacity:[0,1],scale:[1.9,1],rotate:[-24,-9]},{duration:0.32,ease:[0.2,0.9,0.3,1.2]}); lastToggled=null; }
+}
+function showHome(){ const b=bkkNow(); const inPhuket = (b.getUTCMonth()===11 && b.getUTCDate()>=7);
+  const h=inPhuket?HOME_PKT:HOME_BKK; const o=document.getElementById("driver"); o.querySelector(".dr-please").textContent="ไปที่นี่ค่ะ"; o.querySelector(".dr-map").style.display="";
+  openDriver(h.ru+" · "+h.en, h.th, h.addr, h.q); }
+// re-render without clobbering a note being typed
+function softRender(){
+  if(editing.size || currentTab==="search" || currentTab==="money"){ renderStats(); renderDays(); return; }
+  render();
+}
+
+/* ================= FEATURES v3: people, money, now, concert, voice, votes, docs, overview, packing ================= */
+const PEOPLE=["Наташа","Лера","Крис","Таня"];
+const PKEY=n=>"p"+PEOPLE.indexOf(n);
+let ME=(()=>{ try{ return localStorage.getItem("bts-me")||""; }catch(e){ return ""; } })();
+function setMe(n){ ME=n; try{ localStorage.setItem("bts-me",n); }catch(e){} render(); }
+Object.assign(state,{expenses:{}, votes:{}, packing:{}, shared:{rate:2.46, meet:{}}});
+const fmtB=n=>Math.round(n).toLocaleString("ru-RU")+" ฿";
+const fmtR=n=>Math.round(n).toLocaleString("ru-RU")+" ₽";
+const toTHB=(a,cur)=>cur==="RUB"?a/(state.shared.rate||2.46):a;
+
+function whoPicker(compact){
+  const box=el("div",{class:"who"+(compact?" compact":"")});
+  box.innerHTML=compact?`<span>Вы: <b>${esc(ME)}</b></span>`:`<div class="who-q"><b>Кто вы?</b><span>Так приложение подпишет ваши отметки, расходы и голоса. Выбор запоминается на этом телефоне.</span></div>`;
+  const row=el("div",{class:"who-row"});
+  PEOPLE.forEach(n=>{ const b=el("button",{class:"chip","aria-pressed":String(ME===n)},esc(n)); b.addEventListener("click",()=>setMe(n)); row.appendChild(b); });
+  box.appendChild(row); return box;
+}
+
+/* ---- voice ---- */
+function speakTh(text, btn){
+  try{
+    const ss=window.speechSynthesis; if(!ss){ if(btn) btn.textContent="Нет озвучки"; return; }
+    ss.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang="th-TH"; u.rate=0.85;
+    const v=ss.getVoices().find(v=>/^th/i.test(v.lang)); if(v) u.voice=v;
+    else if(ss.getVoices().length && btn){ btn.dataset.l=btn.textContent; btn.textContent="Нет тайского голоса"; setTimeout(()=>btn.textContent=btn.dataset.l,2500); }
+    ss.speak(u);
+  }catch(e){}
+}
+try{ window.speechSynthesis && speechSynthesis.getVoices(); }catch(e){}
+
+/* ---- "now" block ---- */
+function parseMins(s){ if(!s) return 0; const h=/(\d+)[,.]?(\d*)\s*ч/.exec(s); const m=/(\d+)\s*мин/.exec(s); let t=0; if(h) t+=(+h[1]+(h[2]?+("0."+h[2]):0))*60; if(m) t+=+m[1]; if(!h&&!m){ const n=/(\d+)/.exec(s); if(n) t=+n[1]; } return Math.round(t); }
+function hhmm(min){ min=((min%1440)+1440)%1440; return String(Math.floor(min/60)).padStart(2,"0")+":"+String(min%60).padStart(2,"0"); }
+function nowPlan(day){
+  const idx=day.stops.findIndex(s=>!P(s.id).done); if(idx<0) return null;
+  const s=day.stops[idx]; const leg=(LEGS[day.id]||[]).find(l=>l[0]===idx-1);
+  const tm=/(\d{1,2}):(\d{2})/.exec(s.time||""); let leave=null;
+  if(tm && leg){ leave=(+tm[1])*60+(+tm[2])-parseMins(leg[3])-10; }
+  return {s, idx, leg, leave};
+}
+
+/* ---- concert plan ---- */
+function concertCard(d){
+  const key=d.id; const meet=(state.shared.meet||{})[key]||"";
+  const c=el("section",{class:"concert-plan"});
+  c.innerHTML=`<h3>План концертного дня</h3>
+  <ol class="cp-steps">
+   <li><b>За 3 часа до начала</b><span>Выезд из отеля на Grab (≈250–400 ฿ за машину) или BTS до Phaya Thai → Airport Rail Link до Ramkhamhaeng и 20–30 мин пешком. Перед шоу пробки и повышенный тариф.</span></li>
+   <li><b>За 2 часа</b><span>Быть у стадиона: очереди на досмотр, вход и мерч бывают длинными. Время начала и открытия входа — в билете.</span></li>
+   <li><b>Шоу</b><span>Сфотографируйте свой сектор и ближайший выход, чтобы потом быстро найтись.</span></li>
+   <li><b>После</b><span>Grab у стадиона дорогой и долгий. Быстрее отойти пешком к станции Ramkhamhaeng Airport Rail Link или Hua Mak и ехать поездом, а Grab вызывать уже оттуда.</span></li>
+  </ol>
+  <div class="cp-grid">
+   <div><h4>С собой</h4><ul><li>Билет и загранпаспорт</li><li>ARMY Bomb и запасные батарейки</li><li>Заряженный телефон и пауэрбанк</li><li>Наличные бат мелкими купюрами</li><li>Адрес отеля на тайском (кнопка «Адрес жилья для таксиста»)</li></ul></div>
+   <div><h4>Обычно не пускают</h4><ul><li>Профессиональные камеры, планшеты, ноутбуки</li><li>Вейпы: в Таиланде они запрещены вообще</li><li>Зонты-трости, стулья, баннеры на палках</li><li>Большие сумки (крупнее A3), стекло, еду и напитки</li></ul><p class="cp-note">Точные правила проверьте в письме с билетом и на сайте Live Nation Tero.</p></div>
+  </div>
+  <label class="cp-meet"><span>Место встречи, если потеряемся и сядет телефон</span><input type="text" maxlength="160" placeholder="Например: у входа E, возле стойки с мерчем" value="${esc(meet)}"></label>`;
+  const inp=c.querySelector(".cp-meet input"); let t=null;
+  inp.addEventListener("focus",()=>editing.add("meet"));
+  inp.addEventListener("input",()=>{ clearTimeout(t); t=setTimeout(()=>{ state.shared.meet={...(state.shared.meet||{}),[key]:inp.value}; saveShared(); },700); });
+  inp.addEventListener("blur",()=>{ state.shared.meet={...(state.shared.meet||{}),[key]:inp.value}; saveShared(); editing.delete("meet"); });
+  return c;
+}
+
+/* ---- votes ---- */
+function voteBtn(id){
+  const v=state.votes[id]||{}; const names=PEOPLE.filter(n=>v[PKEY(n)]); const mine=ME&&v[PKEY(ME)];
+  const b=el("button",{class:"vote"+(mine?" on":""),"aria-pressed":String(!!mine),title:names.length?"Хотят: "+names.join(", "):"Пока никто не голосовал"},
+    `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 13.5S2 10 2 6a3 3 0 015.5-1.7L8 5l.5-.7A3 3 0 0114 6c0 4-6 7.5-6 7.5z" fill="${mine?"currentColor":"none"}" stroke="currentColor" stroke-width="1.4"/></svg><span>${names.length||""}</span>`);
+  b.addEventListener("click",()=>{ if(!ME){ document.querySelector(".who")?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+    const cur={...(state.votes[id]||{})}; cur[PKEY(ME)]=!cur[PKEY(ME)]; state.votes[id]=cur; saveLocal(); queueWrite("votes/"+id,()=>cur); render(); });
+  return [b,names];
+}
+
+/* ---- shared saves ---- */
+function saveShared(){ saveLocal(); return queueWrite("shared/main",()=>({rate:+state.shared.rate||2.46, meet:{...(state.shared.meet||{})}})); }
+function savePacking(n){ saveLocal(); const k=PKEY(n); return queueWrite("packing/"+k,()=>({items:{...(state.packing[k]||{})}})); }
+
+/* ---- money tab ---- */
+function balances(){
+  const list=Object.entries(state.expenses).filter(([k,e])=>e&&!e.deleted&&e.a>0);
+  const paid={}, owe={}; PEOPLE.forEach(n=>{paid[n]=0;owe[n]=0;});
+  list.forEach(([k,e])=>{ const thb=toTHB(e.a,e.cur); const among=(e.among&&e.among.length?e.among:PEOPLE).filter(n=>PEOPLE.includes(n)); if(!among.length) return; if(PEOPLE.includes(e.by)) paid[e.by]+=thb; among.forEach(n=>owe[n]+=thb/among.length); });
+  const bal={}; PEOPLE.forEach(n=>bal[n]=paid[n]-owe[n]);
+  const cr=PEOPLE.filter(n=>bal[n]>0.5).map(n=>[n,bal[n]]).sort((a,b)=>b[1]-a[1]);
+  const db_=PEOPLE.filter(n=>bal[n]<-0.5).map(n=>[n,-bal[n]]).sort((a,b)=>b[1]-a[1]);
+  const tr=[]; let i=0,j=0; while(i<db_.length&&j<cr.length){ const x=Math.min(db_[i][1],cr[j][1]); if(x>=1) tr.push([db_[i][0],cr[j][0],x]); db_[i][1]-=x; cr[j][1]-=x; if(db_[i][1]<1) i++; if(cr[j][1]<1) j++; }
+  const total=list.reduce((a,[k,e])=>a+toTHB(e.a,e.cur),0);
+  return {paid,owe,bal,tr,total,list};
+}
+function renderMoney(){
+  const m=document.getElementById("money"); m.innerHTML="";
+  const wrap=el("div",{class:"memo"});
+  // converter
+  const cv=el("section",{class:"mcard conv"});
+  const rate=+state.shared.rate||2.46;
+  cv.innerHTML=`<h2>Конвертер</h2><div class="conv-row"><label><span>Баты</span><input inputmode="decimal" id="cvB" placeholder="0"></label><span class="conv-eq">=</span><label><span>Рубли</span><input inputmode="decimal" id="cvR" placeholder="0"></label></div>
+   <div class="chips conv-q">${[100,350,500,1000,3000].map(v=>`<button class="chip" data-v="${v}">${v.toLocaleString("ru-RU")} ฿</button>`).join("")}</div>
+   <label class="conv-rate"><span>Курс: 1 ฿ =</span><input inputmode="decimal" id="cvRate" value="${String(rate).replace(".",",")}"><span>₽</span></label>
+   <p class="cp-note">По умолчанию стоит курс ЦБ на середину ноября. В обменнике выйдет иначе, поправьте под свой курс — он общий для всех и пересчитает расходы.</p>`;
+  const B=cv.querySelector("#cvB"), R=cv.querySelector("#cvR"), RT=cv.querySelector("#cvRate");
+  const num=s=>parseFloat(String(s).replace(/\s/g,"").replace(",","."))||0;
+  const r2=n=>(Math.round(n*100)/100).toLocaleString("ru-RU");
+  B.addEventListener("input",()=>{ R.value=B.value?r2(num(B.value)*(+state.shared.rate||2.46)):""; });
+  R.addEventListener("input",()=>{ B.value=R.value?r2(num(R.value)/(+state.shared.rate||2.46)):""; });
+  cv.querySelectorAll(".conv-q .chip").forEach(c=>c.addEventListener("click",()=>{ B.value=c.dataset.v; B.dispatchEvent(new Event("input")); }));
+  RT.addEventListener("change",()=>{ const v=num(RT.value); if(v>0.5&&v<10){ state.shared.rate=v; saveShared(); renderMoney(); } else RT.value=String(state.shared.rate).replace(".",","); });
+  wrap.appendChild(cv);
+  // who
+  if(!ME) wrap.appendChild(whoPicker(false));
+  // add expense
+  const f=el("section",{class:"mcard exp-form"});
+  f.innerHTML=`<h2>Новый общий расход</h2>
+   <label class="fld"><span>За что</span><input id="exT" maxlength="80" placeholder="Grab до стадиона, ужин на Яоварате…"></label>
+   <div class="fld-row"><label class="fld"><span>Сумма</span><input id="exA" inputmode="decimal" placeholder="0"></label>
+    <div class="fld"><span>Валюта</span><div class="seg2" role="group"><button data-c="THB" aria-pressed="true">฿</button><button data-c="RUB" aria-pressed="false">₽</button></div></div></div>
+   <div class="fld"><span>Кто платил</span><div class="chips" id="exBy">${PEOPLE.map(n=>`<button class="chip" data-n="${n}" aria-pressed="${n===(ME||PEOPLE[0])}">${n}</button>`).join("")}</div></div>
+   <div class="fld"><span>На кого делим</span><div class="chips" id="exAm">${PEOPLE.map(n=>`<button class="chip" data-n="${n}" aria-pressed="true">${n}</button>`).join("")}</div></div>
+   <button class="btn primary" id="exAdd">Добавить расход</button><p class="form-err" id="exErr" hidden></p>`;
+  let cur="THB", by=ME||PEOPLE[0]; const among=new Set(PEOPLE);
+  f.querySelectorAll(".seg2 button").forEach(b=>b.addEventListener("click",()=>{ cur=b.dataset.c; f.querySelectorAll(".seg2 button").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); }));
+  f.querySelectorAll("#exBy .chip").forEach(b=>b.addEventListener("click",()=>{ by=b.dataset.n; f.querySelectorAll("#exBy .chip").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); }));
+  f.querySelectorAll("#exAm .chip").forEach(b=>b.addEventListener("click",()=>{ const n=b.dataset.n; if(among.has(n)&&among.size>1) among.delete(n); else among.add(n); b.setAttribute("aria-pressed",String(among.has(n))); }));
+  f.querySelector("#exAdd").addEventListener("click",()=>{
+    const t=f.querySelector("#exT").value.trim(), a=num(f.querySelector("#exA").value), er=f.querySelector("#exErr");
+    if(!t||!(a>0)){ er.textContent=!t?"Напишите, за что расход.":"Укажите сумму больше нуля."; er.hidden=false; return; }
+    const id="e"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    const e={t, a:Math.round(a*100)/100, cur, by, among:[...among], at:new Date().toISOString(), who:ME||"", deleted:false};
+    state.expenses[id]=e; saveLocal(); queueWrite("expenses/"+id,()=>e); renderMoney();
+    const n=document.querySelector("#money .exp-list"); if(n) mo(n.firstElementChild,{opacity:[0,1],y:[-6,0]},{duration:0.25});
+  });
+  wrap.appendChild(f);
+  // balances
+  const bl=balances();
+  const bc=el("section",{class:"mcard bal"});
+  bc.innerHTML=`<h2>Кто кому должен</h2><div class="bal-total"><span>Общие расходы</span><b>${fmtB(bl.total)}</b><small>≈ ${fmtR(bl.total*(+state.shared.rate||2.46))}</small></div>
+   <div class="bal-grid">${PEOPLE.map(n=>{const v=bl.bal[n];return `<div class="${v>0.5?"pos":v<-0.5?"neg":""}"><span>${n}${n===ME?" (вы)":""}</span><b>${v>0.5?"+":v<-0.5?"−":""}${fmtB(Math.abs(v))}</b><small>заплатила ${fmtB(bl.paid[n])}</small></div>`;}).join("")}</div>
+   ${bl.tr.length?`<ul class="settle">${bl.tr.map(([a,b,x])=>`<li><span><b>${a}</b> → <b>${b}</b></span><span>${fmtB(x)} (≈ ${fmtR(x*(+state.shared.rate||2.46))})</span></li>`).join("")}</ul>`:`<p class="cp-note">${bl.list.length?"Все в расчёте.":"Пока нет расходов. Добавьте первый, и здесь появится, кто кому сколько должен."}</p>`}`;
+  wrap.appendChild(bc);
+  // history
+  if(bl.list.length){
+    const hc=el("section",{class:"mcard"}); hc.innerHTML=`<h2>История</h2>`;
+    const ul=el("div",{class:"exp-list"});
+    bl.list.sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at))).forEach(([id,e])=>{
+      const d=new Date(e.at); const dd=isNaN(d)?"":String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0");
+      const row=el("div",{class:"exp-row"});
+      row.innerHTML=`<div class="exp-main"><b>${esc(e.t)}</b><span>${dd} · платила ${esc(e.by)} · ${e.among&&e.among.length<4?"на "+e.among.map(esc).join(", "):"на всех"}</span></div><div class="exp-sum"><b>${e.cur==="RUB"?fmtR(e.a):fmtB(e.a)}</b>${e.cur==="RUB"?`<small>≈ ${fmtB(toTHB(e.a,e.cur))}</small>`:""}</div>`;
+      const del=el("button",{class:"lnk exp-del"},"Удалить");
+      del.addEventListener("click",()=>{ if(del.dataset.c){ const x={...e,deleted:true}; state.expenses[id]=x; saveLocal(); queueWrite("expenses/"+id,()=>x); renderMoney(); } else { del.dataset.c="1"; del.textContent="Точно удалить?"; del.classList.add("danger"); setTimeout(()=>{ if(del.isConnected){ delete del.dataset.c; del.textContent="Удалить"; del.classList.remove("danger"); } },4000); } });
+      row.appendChild(del); ul.appendChild(row);
+    });
+    hc.appendChild(ul); wrap.appendChild(hc);
+  }
+  m.appendChild(wrap);
+}
+
+/* ---- packing ---- */
+const PACKING=[["Загранпаспорт и его копия в телефоне","Документы"],["QR-код TDAC (скриншот)","Документы"],["Билеты на концерты","Документы"],["Страховой полис офлайн","Документы"],
+ ["Наличные доллары или евро, новые купюры","Деньги"],["Немного бат мелкими на первый день","Деньги"],
+ ["ARMY Bomb и батарейки","Концерт"],["Пауэрбанк (только в ручную кладь)","Концерт"],["Наряд на концерт","Концерт"],
+ ["Одежда, закрывающая плечи и колени, для храмов","Одежда"],["Удобная обувь для ходьбы","Одежда"],["Купальник и пляжные вещи","Одежда"],["Лёгкая кофта для самолёта и кондиционеров","Одежда"],
+ ["Солнцезащитный крем и очки","Прочее"],["Средство от комаров","Прочее"],["Личная аптечка","Прочее"],["Зарядки и переходник","Прочее"],["Складной зонт или дождевик","Прочее"]];
+
+/* ---- documents card ---- */
+function docsCard(){
+  return `<div class="mcard docs" id="docs"><h2>Документы под рукой</h2>
+   <div class="doc-grid">
+    <div class="doc"><span>Концерты</span><b>3 и 6 декабря</b><small>Rajamangala National Stadium, Хуамак<br>ราชมังคลากีฬาสถาน</small><button class="lnk" data-drv="stadium">Показать таксисту</button></div>
+    <div class="doc"><span>Бангкок, 28.11–07.12</span><b>JC Kevin Sathorn</b><small>36 Naradhiwas Rajanagarindra Rd<br>+66 2 210 9000 · заезд с 14:00, выезд до 12:00</small><button class="lnk" data-drv="bkk">Показать таксисту</button></div>
+    <div class="doc"><span>Пхукет, 07.12–11.12</span><b>Дом на Airbnb, Карон</b><small>Адрес и контакт хозяина — в приложении Airbnb</small></div>
+    <div class="doc"><span>Въезд</span><b>TDAC и 30 дней без визы</b><small>QR-код TDAC сохраните скриншотом. Номера броней и полисов — в почте, здесь их нет намеренно.</small></div>
+   </div>
+   <h3 class="doc-h">Перелёты</h3>
+   <div class="tablewrap"><table class="flights"><thead><tr><th>Рейс</th><th>Маршрут</th><th>Вылет</th><th>Прилёт</th></tr></thead><tbody>
+    <tr><td>MU260</td><td>Пулково → Шанхай</td><td>27.11, 21:05</td><td>28.11, 11:30</td></tr>
+    <tr><td>MU8609</td><td>Шанхай → Бангкок BKK</td><td>28.11, 14:50</td><td>≈18:30</td></tr>
+    <tr><td>—</td><td>Бангкок → Пхукет</td><td>07.12, не куплен</td><td></td></tr>
+    <tr><td>PG280</td><td>Пхукет → Бангкок BKK</td><td>11.12, 22:00</td><td>23:35</td></tr>
+    <tr><td>MU548</td><td>Бангкок → Шанхай</td><td>12.12, 01:55</td><td>07:00</td></tr>
+    <tr><td>MU6025</td><td>Шанхай → Пулково</td><td>12.12, 10:30</td><td>15:50</td></tr>
+   </tbody></table></div>
+   <p class="cp-note">По письмам Леры; заказ Кристины на те же рейсы. Время местное. В Шанхае транзит без выхода из аэропорта, в Пулково уточните, оформлен ли багаж до Бангкока.</p></div>`;
+}
+function packingCard(){
+  const c=el("div",{class:"mcard",id:"packing"});
+  c.innerHTML=`<h2>Мои сборы</h2>`;
+  if(!ME){ c.appendChild(whoPicker(false)); return c; }
+  const k=PKEY(ME); const it=state.packing[k]||{}; const done=PACKING.filter((_,i)=>it["k"+i]).length;
+  c.insertAdjacentHTML("beforeend",`<p class="pack-sub">Список ${esc(ME)}: собрано ${done} из ${PACKING.length}. У каждой свой список.</p>`);
+  let grp=""; const cl=el("div",{class:"cl"});
+  PACKING.forEach(([t,g],i)=>{ if(g!==grp){ grp=g; cl.insertAdjacentHTML("beforeend",`<div class="pack-g">${g}</div>`); }
+    const lab=el("label",{for:"pk-"+i}); const inp=el("input",{type:"checkbox",id:"pk-"+i}); inp.checked=!!it["k"+i];
+    inp.addEventListener("change",()=>{ const cur={...(state.packing[k]||{})}; cur["k"+i]=inp.checked; state.packing[k]=cur; savePacking(ME); c.querySelector(".pack-sub").textContent=`Список ${ME}: собрано ${PACKING.filter((_,j)=>cur["k"+j]).length} из ${PACKING.length}. У каждой свой список.`; });
+    lab.append(inp, el("span",{},esc(t))); cl.appendChild(lab); });
+  c.appendChild(cl); c.appendChild(whoPicker(true)); return c;
+}
+
+/* ---- overview ---- */
+const DAYCOL=["#6A47DB","#C2410C","#1D8457","#B4771A","#2F6FB5","#B83280","#0E8A8A","#7C5C2E","#5B6B78","#8E44AD","#D35400","#16A085","#2C3E50","#C0392B"];
+let ovCity="bkk";
+function renderOverview(m){
+  const head=el("section",{class:"dayhead"});
+  head.innerHTML=`<div class="when"><span>28 ноября – 11 декабря</span></div><h2>Вся поездка на одной карте</h2><p>Каждый день своим цветом, на кружке — число месяца. Нажмите на место, чтобы открыть его день.</p>`;
+  const seg=el("div",{class:"seg ov-seg",role:"group"});
+  [["bkk","Бангкок"],["hkt","Пхукет"]].forEach(([k,t])=>{ const b=el("button",{"aria-selected":String(ovCity===k)},t); b.addEventListener("click",()=>{ ovCity=k; render(); }); seg.appendChild(b); });
+  head.appendChild(seg); m.appendChild(head);
+  const days=DAYS.map((d,i)=>({d,i})).filter(({d})=> ovCity==="bkk" ? d.base===HOTEL_BKK : d.base!==HOTEL_BKK);
+  const stops=[]; days.forEach(({d,i})=>d.stops.forEach(s=>{ if(!isFinite(s.lat)) return; if(/airport|transfer|depart|arrive|checkout|hotel-in|karon-home/.test(s.id)) return; stops.push({...s, lbl:String(+d.id.slice(1,3)), col:DAYCOL[i%DAYCOL.length], dayId:d.id}); }));
+  const pseudo={id:"all-"+ovCity, overview:true, stops, base: ovCity==="bkk"?HOTEL_BKK:HOME_HKT};
+  const mc=el("div",{class:"mapcard open"}); m.appendChild(mc); buildMap(mc,pseudo);
+  const lg=el("div",{class:"ov-days"});
+  days.forEach(({d,i})=>{ const b=el("button",{class:"ov-day"},`<i style="background:${DAYCOL[i%DAYCOL.length]}"></i><b>${esc(d.date)}</b><span>${esc(d.title)}</span>`); b.addEventListener("click",()=>{ currentDay=d.id; location.hash=d.id; animDay=true; render(); window.scrollTo({top:0}); }); lg.appendChild(b); });
+  m.appendChild(lg);
+}
+
+/* ---------- NAV ---------- */
+function fromHash(){
+  const h=(location.hash||"").slice(1);
+  if(h==="info"){ currentTab="info"; }
+  else if(h==="money"){ currentTab="money"; }
+  else if(h==="all"){ currentTab="route"; currentDay="all"; }
+  else if(h==="search"){ currentTab="search"; }
+  else if(DAYS.some(d=>d.id===h)){ currentTab="route"; currentDay=h; }
+  else {
+    // open today's day during the trip
+    const now=new Date(); const map={}; DAYS.forEach(d=>{ const dd=d.id.slice(1,3), mm=d.id.slice(3,5); map[`2026-${mm}-${dd}`]=d.id; });
+    const key=now.toISOString().slice(0,10); if(map[key]) currentDay=map[key];
+  }
+}
+document.getElementById("tab-route").addEventListener("click",()=>{ currentTab="route"; animDay=true; location.hash=currentDay; render(); });
+document.getElementById("tab-info").addEventListener("click",()=>{ currentTab="info"; animDay=true; location.hash="info"; render(); });
+document.querySelectorAll(".bottombar button").forEach(b=>b.addEventListener("click",()=>{ const t=b.dataset.tab; if(t==="sos"){ document.getElementById("qSos").click(); return; } currentTab=t; animDay=true; location.hash=t==="route"?currentDay:t; render(); window.scrollTo({top:0}); }));
+document.getElementById("tab-money").addEventListener("click",()=>{ currentTab="money"; animDay=true; location.hash="money"; render(); });
+document.getElementById("tab-search").addEventListener("click",()=>{ currentTab="search"; animDay=true; location.hash="search"; render(); });
+document.getElementById("qHome").addEventListener("click",showHome);
+document.getElementById("qSos").addEventListener("click",()=>{ currentTab="info"; location.hash="info"; render(); setTimeout(()=>{const c=document.getElementById("sos"); if(c) c.scrollIntoView({behavior:"smooth",block:"start"});},50); });
+document.getElementById("drSpeak").addEventListener("click",e=>{ const o=document.getElementById("driver"); speakTh([o.querySelector(".dr-please").textContent,o.querySelector(".dr-th").textContent].filter(Boolean).join(" "), e.currentTarget); });
+document.getElementById("drClose").addEventListener("click",()=>{ const o=document.getElementById("driver"); o.classList.remove("open"); o.querySelector(".dr-please").textContent="ไปที่นี่ค่ะ"; o.querySelector(".dr-map").style.display=""; });
+document.getElementById("driver").addEventListener("click",e=>{ if(e.target.id==="driver") document.getElementById("drClose").click(); });
+window.addEventListener("hashchange",()=>{ fromHash(); render(); });
+document.getElementById("lbClose").addEventListener("click",()=>document.getElementById("lightbox").classList.remove("open"));
+document.getElementById("lightbox").addEventListener("click",e=>{ if(e.target.id==="lightbox") e.currentTarget.classList.remove("open"); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ const fm=document.querySelector(".rmap.full"); if(fm&&fm._close) fm._close(); document.getElementById("lightbox").classList.remove("open"); if(document.getElementById("driver").classList.contains("open")) document.getElementById("drClose").click(); } });
+
+(()=>{ const x=tripTotals(), f=n=>n.toLocaleString("ru-RU"), el2=document.getElementById("tripTotal"); if(el2) el2.innerHTML=`<b>За всю поездку на человека</b>: еда ≈${f(x.f[0])}–${f(x.f[1])} ฿, транспорт по маршруту ≈${f(x.t[0])}–${f(x.t[1])} ฿, входы от ≈${f(x.e)} ฿. Всего ≈${f(x.f[0]+x.t[0]+x.e)}–${f(x.f[1]+x.t[1]+x.e)} ฿.`; })();
+fromHash();
+initSync();
+</script>
+</body>
+</html>
