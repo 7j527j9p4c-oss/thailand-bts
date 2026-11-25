@@ -678,6 +678,39 @@ input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--a
 .ov-day i{width:12px;height:12px;border-radius:50%}
 .ov-day span{color:var(--ink-2)}
 @media (max-width:700px){ .bottombar{grid-template-columns:repeat(5,1fr)!important} .bottombar button{font-size:10.5px} }
+
+/* ===== SOS screen ===== */
+.is-sos header.top{display:none}
+.is-sos .sos-screen{padding-top:var(--s3)}
+.sos-screen{display:grid;gap:var(--s4);padding-top:var(--s5)}
+.sos-head h2{margin:0;font-size:clamp(22px,5.4vw,28px);font-weight:700;letter-spacing:-.015em;color:var(--warn)}
+.sos-head p{margin:var(--s2) 0 var(--s3);color:var(--ink-2);font-size:var(--t-sm)}
+.sos-seg{display:inline-flex}
+.sos-seg button{border:0;background:transparent;padding:8px 18px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.sos-seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(24,19,42,.1),0 0 0 1px var(--line)}
+.sos-block{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:var(--s2) var(--s4);display:grid}
+.sos-block h3{margin:var(--s3) 0 var(--s1);font-size:var(--t-lg);font-weight:700}
+.sos-call{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);padding:var(--s3) 0;border-top:1px solid var(--line);text-decoration:none;color:var(--ink);min-height:56px}
+.sos-block > .sos-call:first-child,.sos-block h3 + .sos-call{border-top:0}
+.sos-call span:first-child{display:grid;gap:1px;min-width:0}
+.sos-call b{font-size:var(--t-md);font-weight:600}
+.sos-call small{font-size:var(--t-xs);color:var(--muted)}
+.sos-num{display:inline-flex;align-items:center;gap:8px;flex:none;font-weight:700;font-variant-numeric:tabular-nums;color:var(--warn);background:var(--warn-soft);padding:8px 12px;border-radius:999px;font-size:14px}
+.sos-call.big .sos-num{font-size:18px;padding:10px 14px}
+.sos-call:active{opacity:.7}
+.lost p,.steps li{font-size:var(--t-sm);color:var(--ink-2)}
+.lost p{margin:0 0 var(--s3)}
+.lost-addr{background:var(--surface-2);border-radius:var(--r-md);padding:var(--s4);display:grid;gap:4px}
+.lost-addr b{font-size:24px;line-height:1.3}
+.lost-addr span{font-size:var(--t-sm);color:var(--muted)}
+.lost-meet{margin-top:var(--s2);border-radius:var(--r-md);padding:var(--s3) var(--s4);background:var(--accent-soft);display:grid;gap:2px}
+.lost-meet span{font-size:var(--t-xs);color:var(--accent);font-weight:600}
+.sos-acts{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin:var(--s3) 0}
+.sos-block .phr{padding-bottom:var(--s3)}
+.steps ol{margin:0 0 var(--s3);padding-left:var(--s5);display:grid;gap:var(--s2)}
+.sos-link{display:grid;gap:2px;text-align:left;cursor:pointer;width:100%;font:inherit;color:var(--ink);box-shadow:inset 4px 0 0 var(--warn),var(--sh-1)}
+.sos-link b{color:var(--warn);font-size:var(--t-lg)}
+.sos-link span{font-size:var(--t-sm);color:var(--ink-2)}
 </style>
 <script>
 /* Hosted / Telegram build: marks and notes are stored on this device. */
@@ -725,6 +758,7 @@ window.__OFFLINE__=true;
   <main id="route"></main>
   <main id="money" hidden></main>
   <main id="search" hidden></main>
+  <main id="sos" hidden></main>
   <main id="info" hidden></main>
 </div>
 
@@ -967,7 +1001,7 @@ const TH = {"bkk-airport-in": "ท่าอากาศยานสุวรร�
 const HOURS = {"bacc": {"d": [0, 2, 3, 4, 5, 6], "o": "10:00", "c": "20:00"}, "paragon": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "22:00"}, "centralworld": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "22:00"}, "lv-place": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "20:00"}, "mahanakhon": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "19:00"}, "grand-palace": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "08:30", "c": "15:30", "n": "касса до 15:30"}, "wat-pho": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "08:00", "c": "19:30"}, "wat-arun": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "08:00", "c": "18:00"}, "golden-mount": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "07:00", "c": "19:00"}, "hex-bar": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "18:00", "c": "01:00", "n": "днём здесь кофейня, 07:00–16:00"}, "ayutthaya": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "08:00", "c": "18:00"}, "wat-samphran": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "06:00", "c": "18:00"}, "space-time": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:30", "c": "21:30"}, "chang-chui": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "11:00", "c": "23:00", "chk": "По части источников по средам закрыт — проверьте часы в Google Maps перед поездкой"}, "ancient-city": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "09:00", "c": "19:00", "n": "последний вход в 18:00"}, "erawan": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "09:00", "c": "18:00", "n": "последний вход в 17:00"}, "tichuca": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "17:00", "c": "00:00"}, "chatuchak": {"d": [0, 6], "o": "09:00", "c": "18:00", "n": "основной рынок только по выходным"}, "dd-mall": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "10:00", "c": "20:00", "n": "больше магазинов открыто пт–вс"}, "moca": {"d": [0, 2, 3, 4, 5, 6], "o": "10:00", "c": "18:00"}, "train-market": {"d": [0, 1, 2, 3, 4, 5, 6], "o": "17:00", "c": "01:00"}, "dib": {"d": [0, 1, 4, 5, 6], "o": "10:00", "c": "19:00"}};
 const PHRASES = [["Здравствуйте", "สวัสดีค่ะ", "саватди кха"], ["Спасибо", "ขอบคุณค่ะ", "кхоп кхун кха"], ["Отвезите сюда, пожалуйста", "ไปที่นี่ค่ะ", "пай тхи ни кха"], ["По счётчику, пожалуйста", "เปิดมิเตอร์ด้วยค่ะ", "пэт митэ дуай кха"], ["Остановите здесь", "จอดตรงนี้ค่ะ", "джот тронг ни кха"], ["Сколько стоит?", "เท่าไหร่คะ", "тхао рай кха"], ["Можно дешевле?", "ลดได้ไหมคะ", "лот дай май кха"], ["Не острое, пожалуйста", "ไม่เผ็ดค่ะ", "май пхет кха"], ["Чуть-чуть острое", "เผ็ดนิดหน่อยค่ะ", "пхет нит ной кха"], ["Без льда", "ไม่ใส่น้ำแข็งค่ะ", "май сай нам кхэнг кха"], ["Счёт, пожалуйста", "เช็คบิลค่ะ", "чек бин кха"], ["Где туалет?", "ห้องน้ำอยู่ที่ไหนคะ", "хонг нам ю тхи най кха"], ["Помогите!", "ช่วยด้วย", "чуай дуай"]];
 const HOME_BKK = {ru:"Отель JC Kevin Sathorn", th:"โรงแรม เจซี เควิน สาทร", addr:"36 ถนนนราธิวาสราชนครินทร์ แขวงยานนาวา เขตสาทร กรุงเทพฯ 10120", en:"JC Kevin Sathorn Bangkok Hotel, 36 Naradhiwas Rajanagarindra Rd, Sathon", q:"JC Kevin Sathorn Bangkok Hotel"};
-const HOME_PKT = {ru:"Дом в Кароне", th:"หาดกะรน ภูเก็ต", addr:"Точный адрес дома — в приложении Airbnb", en:"Karon Beach, Phuket", q:"Karon Beach Phuket"};
+const HOME_PKT = {ru:"Дом в Кароне", th:"หาดกะรน ภูเก็ต", addr:"ตำบลกะรน อำเภอเมืองภูเก็ต จังหวัดภูเก็ต 83100", en:"Karon Beach, Phuket", q:"Karon Beach Phuket"};
 function dayDate(id){ return new Date(Date.UTC(2026, +id.slice(3,5)-1, +id.slice(1,3))); }
 function dayWd(id){ return dayDate(id).getUTCDay(); }
 function bkkNow(){ const n=new Date(); return new Date(n.getTime()+7*3600000); } // UTC fields = Bangkok local
@@ -986,6 +1020,8 @@ function openDriver(name, th, extra, q){
   mo(o.querySelector(".dr-card"),{opacity:[0,1],scale:[0.94,1]},{type:"spring",bounce:0.25,duration:0.45});
 }
 const LEGS = {"d2811": [[0, "taxi", "Из аэропорта в отель: такси со стоянки в зале прилёта по счётчику или Grab", "40–60 мин", 300, 450, "car", "К счётчику добавятся 50 ฿ сбора аэропорта и платные дороги"]], "d2911": [[-1, "grab", "Из отеля в bit.studio", "15–20 мин", 90, 140, "car", "Или MRT Lumphini → Sam Yan, ≈20 ฿"], [0, "grab", "До BACC", "10 мин", 70, 110, "car", ""], [1, "walk", "До Siam Paragon пешком по крытому переходу", "5 мин", 0, 0, "pp", ""], [2, "walk", "До CentralWorld по скайуоку", "10 мин", 0, 0, "pp", ""], [3, "walk", "До Gaysorn Amarin", "5 мин", 0, 0, "pp", ""], [4, "walk", "До Canvas Ploenchit, напротив Central Embassy", "10 мин", 0, 0, "pp", ""], [5, "bts", "BTS Phloen Chit → Siam → Chong Nonsi", "20 мин", 30, 40, "pp", ""], [6, "grab", "Обратно в отель", "10 мин", 60, 90, "car", "Или пешком 20 мин"]], "d3011": [[-1, "grab", "Из отеля к Большому дворцу", "25 мин", 130, 180, "car", "Или MRT Lumphini → Sanam Chai, ≈30 ฿, и 10 мин пешком"], [0, "walk", "До Ват Пхо", "10 мин", 0, 0, "pp", ""], [1, "boat", "Паром от пристани Tha Tien через реку", "5 мин", 5, 5, "pp", "Платите наличными на пристани"], [2, "grab", "Паром обратно, затем Grab до Golden Mount", "25 мин", 80, 120, "car", ""], [3, "grab", "До Song Wat", "15 мин", 70, 100, "car", ""], [4, "walk", "Пешком по Song Wat", "2 мин", 0, 0, "pp", ""], [5, "walk", "До Яоварата", "10 мин", 0, 0, "pp", ""], [6, "walk", "До Hex Bar", "5 мин", 0, 0, "pp", ""], [7, "grab", "Обратно в отель", "20 мин", 100, 150, "car", "Или MRT Wat Mangkon → Lumphini, ≈30 ฿"]], "d0112": [[-1, "car", "Машина с водителем на весь день: туда, между храмами и обратно", "1,5 ч в одну сторону", 1800, 2500, "car", "Ориентир по цене, договаривайтесь заранее через Grab Rent или экскурсионное бюро"], [0, "grab", "Из отеля на Asiatique", "10–15 мин", 70, 100, "car", ""], [1, "grab", "До Sky Bar", "10 мин", 70, 110, "car", ""], [2, "grab", "Обратно в отель", "10 мин", 60, 90, "car", ""]], "d0212": [[-1, "grab", "Из отеля в Wat Samphran", "≈1 ч", 450, 600, "car", "Общественный транспорт туда неудобен"], [0, "grab", "До ТЦ Seacon Bangkae", "35 мин", 300, 400, "car", ""], [1, "grab", "До Chang Chui", "25 мин", 150, 220, "car", ""], [2, "grab", "Обратно в отель", "30 мин", 180, 260, "car", ""]], "d0312": [[-1, "walk", "Из отеля в парк Люмпини", "25 мин", 0, 0, "pp", "Или Grab ≈60–90 ฿"], [0, "walk", "До One Bangkok", "5 мин", 0, 0, "pp", ""], [1, "grab", "До Hanaya 1976", "15 мин", 70, 110, "car", ""], [2, "grab", "После отдыха в отеле — на стадион", "40–70 мин", 250, 400, "car", "Выезжайте за 3 часа: перед шоу пробки и повышенный тариф"], [3, "grab", "После шоу обратно в отель", "40–90 мин", 300, 600, "car", "Быстрее отойти пешком 20–30 мин к станции Airport Rail Link Ramkhamhaeng и ехать поездом, ≈40–60 ฿"]], "d0412": [[-1, "bts", "BTS Chong Nonsi → Siam → Kheha, затем такси 5 мин", "≈1 ч 10 мин", 75, 85, "pp", "Вместе с долей такси от станции"], [0, "grab", "До Erawan Museum", "20 мин", 150, 220, "car", ""], [1, "bts", "BTS Chang Erawan → Ekkamai, затем 10 мин пешком", "40 мин", 40, 50, "pp", ""], [2, "walk", "В том же здании T-One", "1 мин", 0, 0, "pp", ""], [3, "grab", "Обратно в отель", "30 мин", 150, 220, "car", ""]], "d0512": [[-1, "mrt", "MRT Lumphini → Kamphaeng Phet", "30 мин", 35, 40, "pp", "До станции Lumphini 15 мин пешком или Grab"], [0, "walk", "До DD Mall", "10 мин", 0, 0, "pp", ""], [1, "grab", "До MOCA", "20 мин", 120, 170, "car", ""], [2, "grab", "До Train Night Market", "30 мин", 150, 220, "car", ""], [3, "mrt", "MRT Thailand Cultural Centre → Lumphini", "25 мин", 30, 35, "pp", ""]], "d0612": [[-1, "grab", "Из отеля в Dib Bangkok", "25 мин", 150, 200, "car", ""], [0, "grab", "До Cloud 11", "15 мин", 90, 130, "car", "Или BTS Ekkamai → Punnawithi, ≈30 ฿"], [1, "walk", "До True Digital Park", "5 мин", 0, 0, "pp", ""], [2, "grab", "На стадион", "30–50 мин", 200, 320, "car", ""], [3, "grab", "После шоу обратно в отель", "40–90 мин", 300, 600, "car", "Или пешком к Airport Rail Link Ramkhamhaeng и поездом"]], "d0712": [[0, "grab", "Из отеля в аэропорт", "40–60 мин", 350, 500, "car", "Берите GrabCar XL или два такси: четыре человека с чемоданами"], [1, "grab", "Из аэропорта Пхукета в Карон: Bolt или Grab", "50–60 мин", 800, 1100, "car", "Bolt обычно дешевле Grab"], [2, "walk", "До пляжа", "5–10 мин", 0, 0, "pp", ""]], "d0812": [[-1, "tour", "Трансфер из Карона входит в экскурсию", "", 0, 0, "pp", ""]], "d0912": [[-1, "tour", "Трансфер и лодка входят в экскурсию", "", 0, 0, "pp", ""]], "d1012": [[-1, "grab", "Из Карона к Большому Будде", "20 мин", 300, 450, "car", "Можно взять машину с водителем на день, ≈2000–3000 ฿"], [0, "grab", "До Ват Чалонг", "15 мин", 250, 350, "car", ""], [1, "grab", "До старого города", "25 мин", 300, 400, "car", ""], [2, "grab", "До мыса Промтеп", "40 мин", 500, 700, "car", ""], [3, "grab", "Обратно в Карон", "25 мин", 300, 450, "car", ""]], "d1112": [[0, "grab", "Из Карона в JW Marriott, Май Кхао", "≈1 ч", 800, 1100, "car", ""], [1, "grab", "В аэропорт", "15 мин", 200, 350, "car", ""]]};
+const THA = {"bkk-airport-in": ["ท่าอากาศยานสุวรรณภูมิ", "อำเภอบางพลี จังหวัดสมุทรปราการ"], "bkk-hotel-in": ["โรงแรม เจซี เควิน สาทร", "36 ถนนนราธิวาสราชนครินทร์ เขตสาทร กรุงเทพฯ"], "bkk-checkout": ["โรงแรม เจซี เควิน สาทร", "36 ถนนนราธิวาสราชนครินทร์ เขตสาทร กรุงเทพฯ"], "bitstudio": ["สโลว์คอมโบ สามย่าน ชั้น 3", "ถนนพระราม 4 เขตปทุมวัน กรุงเทพฯ"], "bacc": ["หอศิลปวัฒนธรรมแห่งกรุงเทพมหานคร", "สี่แยกปทุมวัน เขตปทุมวัน กรุงเทพฯ"], "paragon": ["สยามพารากอน", "ถนนพระราม 1 เขตปทุมวัน กรุงเทพฯ"], "centralworld": ["เซ็นทรัลเวิลด์", "แยกราชประสงค์ เขตปทุมวัน กรุงเทพฯ"], "lv-place": ["เกษร อมรินทร์", "แยกราชประสงค์ เขตปทุมวัน กรุงเทพฯ"], "stolen-sala": ["แคนวาส เพลินจิต ชั้น 7", "ถนนเพลินจิต เขตปทุมวัน กรุงเทพฯ"], "mahanakhon": ["คิง เพาเวอร์ มหานคร", "ถนนนราธิวาสราชนครินทร์ ช่องนนทรี เขตบางรัก กรุงเทพฯ"], "grand-palace": ["พระบรมมหาราชวัง", "ถนนหน้าพระลาน เขตพระนคร กรุงเทพฯ"], "wat-pho": ["วัดโพธิ์", "ถนนสนามไชย เขตพระนคร กรุงเทพฯ"], "wat-arun": ["วัดอรุณราชวราราม", "ถนนอรุณอมรินทร์ เขตบางกอกใหญ่ กรุงเทพฯ"], "golden-mount": ["วัดสระเกศ ภูเขาทอง", "ถนนบริพัตร เขตป้อมปราบศัตรูพ่าย กรุงเทพฯ"], "song-wat": ["ถนนทรงวาด", "เขตสัมพันธวงศ์ กรุงเทพฯ"], "soso": ["ถนนทรงวาด", "เขตสัมพันธวงศ์ กรุงเทพฯ"], "yaowarat": ["ถนนเยาวราช", "เขตสัมพันธวงศ์ กรุงเทพฯ"], "hex-bar": ["ซอยวานิช 1 สำเพ็ง", "เขตสัมพันธวงศ์ กรุงเทพฯ"], "ayutthaya": ["อุทยานประวัติศาสตร์พระนครศรีอยุธยา", "จังหวัดพระนครศรีอยุธยา"], "asiatique": ["เอเชียทีค เดอะ ริเวอร์ฟร้อนท์", "ถนนเจริญกรุง เขตบางคอแหลม กรุงเทพฯ"], "skybar": ["สกายบาร์ โรงแรมเลอบัว สเตท ทาวเวอร์", "ถนนสีลม เขตบางรัก กรุงเทพฯ"], "wat-samphran": ["วัดสามพราน", "อำเภอสามพราน จังหวัดนครปฐม"], "space-time": ["ซีคอน บางแค", "ถนนเพชรเกษม เขตภาษีเจริญ กรุงเทพฯ"], "chang-chui": ["ช่างชุ่ย", "ถนนสิรินธร เขตบางพลัด กรุงเทพฯ"], "lumpini": ["สวนลุมพินี", "ถนนพระราม 4 เขตปทุมวัน กรุงเทพฯ"], "one-bkk": ["วัน แบงค็อก", "ถนนพระราม 4 เขตปทุมวัน กรุงเทพฯ"], "hanaya": ["ร้านอาหารญี่ปุ่นฮานายะ", "เขตบางรัก กรุงเทพฯ"], "rajamangala-1": ["ราชมังคลากีฬาสถาน", "ถนนรามคำแหง หัวหมาก เขตบางกะปิ กรุงเทพฯ"], "rajamangala-2": ["ราชมังคลากีฬาสถาน", "ถนนรามคำแหง หัวหมาก เขตบางกะปิ กรุงเทพฯ"], "ancient-city": ["เมืองโบราณ", "ถนนสุขุมวิท บางปู จังหวัดสมุทรปราการ"], "erawan": ["พิพิธภัณฑ์ช้างเอราวัณ", "ถนนสุขุมวิท จังหวัดสมุทรปราการ"], "subsolum": ["อาคารทีวัน สุขุมวิท 40", "เขตคลองเตย กรุงเทพฯ"], "tichuca": ["ทิชูก้า รูฟท็อปบาร์ อาคารทีวัน", "สุขุมวิท 40 เขตคลองเตย กรุงเทพฯ"], "chatuchak": ["ตลาดนัดจตุจักร", "ถนนกำแพงเพชร 2 เขตจตุจักร กรุงเทพฯ"], "dd-mall": ["ดีดี มอลล์ ใกล้ MRT กำแพงเพชร", "เขตจตุจักร กรุงเทพฯ"], "moca": ["พิพิธภัณฑ์ศิลปะไทยร่วมสมัย", "ถนนกำแพงเพชร 6 เขตจตุจักร กรุงเทพฯ"], "train-market": ["ตลาดนัดรถไฟรัชดา", "ถนนรัชดาภิเษก เขตดินแดง กรุงเทพฯ"], "dib": ["พิพิธภัณฑ์ศิลปะร่วมสมัย ดิบ กรุงเทพ", "สุขุมวิท ซอย 40 เขตคลองเตย กรุงเทพฯ"], "cloud11": ["คลาวด์ 11", "ถนนสุขุมวิท ใกล้บีทีเอสปุณณวิถี เขตพระโขนง กรุงเทพฯ"], "glass-pavilion": ["ทรู ดิจิทัล พาร์ค", "ถนนสุขุมวิท 101 เขตพระโขนง กรุงเทพฯ"], "hkt-arrive": ["ท่าอากาศยานภูเก็ต", "อำเภอถลาง จังหวัดภูเก็ต"], "hkt-depart": ["ท่าอากาศยานภูเก็ต อาคารผู้โดยสารภายในประเทศ", "อำเภอถลาง จังหวัดภูเก็ต"], "karon-beach": ["หาดกะรน", "ตำบลกะรน อำเภอเมืองภูเก็ต"], "phangnga": ["อ่าวพังงา", "จังหวัดพังงา"], "koh-panyee": ["เกาะปันหยี", "อ่าวพังงา จังหวัดพังงา"], "plankton": ["ทัวร์พายเรือคายัค อ่าวพังงา", "จังหวัดพังงา"], "phiphi": ["เกาะพีพี", "จังหวัดกระบี่"], "krabi": ["หาดไร่เลย์", "จังหวัดกระบี่"], "big-buddha": ["พระใหญ่ภูเก็ต", "ยอดเขานาคเกิด ตำบลกะรน จังหวัดภูเก็ต"], "wat-chalong": ["วัดฉลอง", "ตำบลฉลอง อำเภอเมืองภูเก็ต"], "old-town": ["เมืองเก่าภูเก็ต ถนนถลาง", "อำเภอเมืองภูเก็ต"], "promthep": ["แหลมพรหมเทพ", "ตำบลราไวย์ อำเภอเมืองภูเก็ต"], "mandara": ["เจดับบลิว แมริออท ภูเก็ต รีสอร์ท", "หาดไม้ขาว อำเภอถลาง จังหวัดภูเก็ต"], "bkk-transfer": ["ท่าอากาศยานสุวรรณภูมิ", "อำเภอบางพลี จังหวัดสมุทรปราการ"]};
+function drvStop(s){ const t=THA[s.id]; openDriver(s.name, t?t[0]:TH[s.id], t?t[1]:"", s.q); }
 const MODE={walk:["Пешком","#7A8A84"],bts:["BTS","#2E9A4E"],mrt:["MRT","#2F6FB5"],arl:["Airport Rail Link","#B5473A"],boat:["Паром","#2A9BB0"],grab:["Grab / Bolt","#B9800F"],taxi:["Такси","#B9800F"],car:["Машина с водителем","#8A5A2B"],tour:["Экскурсия","#7A4BD8"],plane:["Самолёт","#5B6B78"]};
 const GROUP=4;
 function legPP(l){ const [a,mode,t,m,lo,hi,per]=l; return per==="car"?[Math.round(lo/GROUP/5)*5,Math.round(hi/GROUP/5)*5]:[lo,hi]; }
@@ -1343,7 +1379,7 @@ function buildMap(host, day){
     pop.innerHTML=`<button class="pop-x" aria-label="Закрыть">×</button><div class="pop-h"><span class="pop-n${done?" done":""}"${s.col?` style="background:${s.col};color:#fff"`:""}>${s.lbl?s.lbl:done?"✓":s.n}</span><div><b>${esc(s.name)}</b><small>${esc([s.time,s.area].filter(Boolean).join(", "))}</small></div></div>${leg?`<div class="pop-leg"><i style="background:${md[1]}"></i>Сюда: ${esc(md[0])}${leg[3]?", "+esc(leg[3]):""}</div>`:""}${fee?`<div class="pop-fee">${esc(fee[1])}</div>`:""}${fromMe}${near}<div class="pop-act"><button class="btn primary" data-a="card">Открыть карточку</button><a class="btn" href="${gmaps(s.q)}" target="_blank" rel="noopener">Google Maps</a><button class="btn" data-a="drv">Таксисту</button></div>`;
     pop.hidden=false; draw();
     pop.querySelector(".pop-x").onclick=()=>{ pop.hidden=true; sel=null; draw(); };
-    pop.querySelector('[data-a="drv"]').onclick=()=>openDriver(s.name, TH[s.id], s.area, s.q);
+    pop.querySelector('[data-a="drv"]').onclick=()=>drvStop(s);
     pop.querySelector('[data-a="card"]').onclick=()=>{ if(day.overview&&s.dayId){ currentDay=s.dayId; location.hash=s.dayId; render(); setTimeout(()=>{ const c=document.getElementById("stop-"+id); if(c){ c.scrollIntoView({behavior:"auto",block:"start"}); c.classList.add("flash"); } },80); return; } if(isFull()) setFull(false); const c=document.getElementById("stop-"+id); if(c){ c.scrollIntoView({behavior:RM?"auto":"smooth",block:"start"}); c.classList.add("flash"); setTimeout(()=>c.classList.remove("flash"),1600); } };
     if(!RM && window.Motion) mo(pop,{opacity:[0,1],y:[10,0]},{duration:0.2});
   }
@@ -1465,7 +1501,7 @@ function stopCard(s,i,n,dayId){
   const map=el("a",{class:"lnk",href:gmaps(s.q),target:"_blank",rel:"noopener"},"Google Maps");
   const pics=el("a",{class:"lnk",href:"https://www.google.com/search?tbm=isch&q="+encodeURIComponent(s.q),target:"_blank",rel:"noopener"},"Фото");
   const drv=el("button",{class:"lnk"},"Таксисту");
-  drv.addEventListener("click",()=>openDriver(s.name, TH[s.id], s.area, s.q));
+  drv.addEventListener("click",()=>drvStop(s));
   const onmap=el("button",{class:"lnk"},"На карте");
   onmap.addEventListener("click",()=>{ if(curMap && curMap.dayId===dayId) curMap.focus(s.id); });
   actions.append(chk,onmap,map,pics,drv);
@@ -1525,7 +1561,7 @@ function renderRoute(){
       tb.innerHTML=`<div class="t-lbl">Сейчас · дальше по плану</div><div class="t-row"><b>${esc(nxt.name)}</b><span>${esc(nxt.time||"")}${nxt.area?", "+esc(nxt.area):""}</span></div>${when}${lg?`<div class="now-leg"><i style="background:${md[1]}"></i><span><b>${esc(md[0])}</b>${lg[3]?" · "+esc(lg[3]):""}${pp&&pp[1]?" · ≈"+pp[0]+"–"+pp[1]+" ฿ с человека":""}</span><small>${esc(lg[2])}</small></div>`:""}`;
       const acts=el("div",{class:"actions"});
       const r=el("a",{class:"btn primary",href:"https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(nxt.q),target:"_blank",rel:"noopener"},"Маршрут туда");
-      const t=el("button",{class:"btn"},"Таксисту"); t.addEventListener("click",()=>openDriver(nxt.name,TH[nxt.id],nxt.area,nxt.q));
+      const t=el("button",{class:"btn"},"Таксисту"); t.addEventListener("click",()=>drvStop(nxt));
       const dn=el("button",{class:"btn"},"Уже были"); dn.addEventListener("click",()=>{const q=P(nxt.id); q.done=true; state.places[nxt.id]=q; savePlace(nxt.id); render();});
       const sc=el("button",{class:"btn"},"К карточке"); sc.addEventListener("click",()=>{const c=document.getElementById("stop-"+nxt.id); if(c) c.scrollIntoView({behavior:"smooth"});});
       acts.append(r,t,dn,sc); tb.appendChild(acts); }
@@ -1615,23 +1651,7 @@ function renderSearch(){
 function renderInfo(){
   const m=document.getElementById("info");
   m.innerHTML=`<div class="memo">
-  <div class="mcard sos-card" id="sos"><h2>Экстренные контакты</h2>
-   <div class="sos-grid">
-    <div><b>1155</b><span>Туристическая полиция, говорят по-английски, круглосуточно</span></div>
-    <div><b>1669</b><span>Скорая помощь (государственная)</span></div>
-    <div><b>191</b><span>Полиция и все экстренные службы</span></div>
-    <div><b>199</b><span>Пожарные</span></div>
-   </div>
-   <ul>
-    <li><b>Посольство России в Бангкоке</b>: 78 Sap Rd, Bang Rak (недалеко от отеля). Тел. +66 2 234 9824. Консульский отдел +66 2 234 2012. <b>Дежурный телефон для экстренных случаев: +66 90 403 3645.</b></li>
-    <li><b>Генконсульство России на Пхукете</b>: 63/501 Moo 2, Thepkasattri Rd, Ko Kaeo. Тел. +66 95 259 8081.</li>
-    <li><b>Больница в Бангкоке рядом с отелем</b>: BNH Hospital (โรงพยาบาลบีเอ็นเอช), 9/1 Convent Rd, Silom. Приёмный покой 24/7, тел. +66 2 632 1000.</li>
-    <li><b>Больница на Пхукете</b>: Bangkok Hospital Phuket (โรงพยาบาลกรุงเทพภูเก็ต), 2/1 Hongyok Utis Rd. Тел. +66 76 254 425, частная скорая — 1719.</li>
-    <li>Страховки и номера полисов держите в почте и офлайн на телефоне. При обращении в больницу сначала звоните в страховую.</li>
-   </ul>
-   <div class="actions"><button class="btn" id="sosHome">Показать адрес отеля водителю</button></div>
-  </div>
-
+  <button class="mcard sos-link" id="toSos"><b>Экстренная помощь</b><span>Телефоны, больницы, консульство, «Я потерялась», потеря паспорта</span></button>
   ${docsCard()}
   <div id="packSlot"></div>
   <div class="mcard"><h2>Разговорник</h2><p class="cp-note" style="margin-top:-4px">Нажмите на фразу, чтобы показать её крупно, или на динамик, чтобы телефон произнёс её по-тайски.</p><div class="phr" id="phr"></div>
@@ -1704,7 +1724,7 @@ function renderInfo(){
   </div>`;
   const ph=m.querySelector("#phr");
   PHRASES.forEach(([ru,th,tr])=>{ const b=el("button",{class:"phr-row"}); b.innerHTML=`<span class="p-ru">${esc(ru)}</span><span class="p-th">${esc(th)}</span><span class="p-tr">${esc(tr)}</span>`; b.addEventListener("click",()=>{ const o=document.getElementById("driver"); o.querySelector(".dr-please").textContent=""; openDriver(ru, th, tr, null); o.querySelector(".dr-map").style.display="none"; }); const wrapP=el("div",{class:"phr-item"}); const sp=el("button",{class:"speak","aria-label":"Произнести: "+ru},'<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 8v4h3l4 3.5V4.5L6 8z" fill="currentColor"/><path d="M13 7.2a4 4 0 010 5.6M15.2 5a7 7 0 010 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'); sp.addEventListener("click",()=>speakTh(th,null)); wrapP.append(b,sp); ph.appendChild(wrapP); });
-  m.querySelector("#sosHome").addEventListener("click",showHome);
+  m.querySelector("#toSos").addEventListener("click",()=>document.getElementById("qSos").click());
   m.querySelector("#packSlot").replaceWith(packingCard());
   m.querySelectorAll("[data-drv]").forEach(b=>b.addEventListener("click",()=>{ const k=b.dataset.drv; if(k==="bkk") openDriver(HOME_BKK.ru, HOME_BKK.th, HOME_BKK.addr, "JC Kevin Sathorn Bangkok Hotel"); else openDriver("Rajamangala National Stadium","ราชมังคลากีฬาสถาน","286 ถนนรามคำแหง หัวหมาก บางกะปิ","Rajamangala National Stadium"); }));
   const cl=m.querySelector("#checklist");
@@ -1720,11 +1740,11 @@ function renderInfo(){
 function render(){
   renderStats(); renderDays();
   const r=document.getElementById("route"), i=document.getElementById("info"), se=document.getElementById("search"), mn=document.getElementById("money");
-  mn.hidden=currentTab!=="money";
+  mn.hidden=currentTab!=="money"; document.body.classList.toggle("is-sos",currentTab==="sos"); document.getElementById("sos").hidden=currentTab!=="sos";
   ["route","money","search","info"].forEach(t=>document.getElementById("tab-"+t).setAttribute("aria-selected",String(currentTab===t)));
   document.querySelectorAll(".bottombar button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.tab===currentTab)));
   r.hidden=currentTab!=="route"; i.hidden=currentTab!=="info"; se.hidden=currentTab!=="search";
-  if(currentTab==="route") renderRoute(); else if(currentTab==="info") renderInfo(); else if(currentTab==="money") renderMoney(); else renderSearch();
+  if(currentTab==="route") renderRoute(); else if(currentTab==="info") renderInfo(); else if(currentTab==="money") renderMoney(); else if(currentTab==="sos") renderSos(); else renderSearch();
   afterRender();
 }
 function afterRender(){
@@ -1740,10 +1760,10 @@ function afterRender(){
 }
 function showHome(){ const b=bkkNow(); const inPhuket = (b.getUTCMonth()===11 && b.getUTCDate()>=7);
   const h=inPhuket?HOME_PKT:HOME_BKK; const o=document.getElementById("driver"); o.querySelector(".dr-please").textContent="ไปที่นี่ค่ะ"; o.querySelector(".dr-map").style.display="";
-  openDriver(h.ru+" · "+h.en, h.th, h.addr, h.q); }
+  openDriver(h.ru, h.th, h.addr, h.q); }
 // re-render without clobbering a note being typed
 function softRender(){
-  if(editing.size || currentTab==="search" || currentTab==="money"){ renderStats(); renderDays(); return; }
+  if(editing.size || currentTab==="search" || currentTab==="money" || currentTab==="sos"){ renderStats(); renderDays(); return; }
   render();
 }
 
@@ -1962,11 +1982,64 @@ function renderOverview(m){
   m.appendChild(lg);
 }
 
+/* ---- SOS screen ---- */
+const SOS_PHR=[["Помогите!","ช่วยด้วยค่ะ","чуай дуай кха"],["Мне нужен врач","ฉันต้องการหมอค่ะ","чан тонг-кан мо кха"],["Отвезите в больницу","ไปโรงพยาบาลค่ะ","пай ронг-пха-ябан кха"],["Вызовите полицию","ช่วยเรียกตำรวจหน่อยค่ะ","чуай рияк тамруат ной кха"],["У меня украли сумку","กระเป๋าของฉันถูกขโมยค่ะ","крапао кхонг чан тхук кхамой кха"],["Я потерялась","ฉันหลงทางค่ะ","чан лонг тханг кха"]];
+let sosCity=null;
+function renderSos(){
+  const m=document.getElementById("sos"); m.innerHTML="";
+  const b=bkkNow(); const autoPkt=(b.getUTCMonth()===11 && b.getUTCDate()>=7 && b.getUTCDate()<=11);
+  const city=sosCity||(autoPkt?"hkt":"bkk");
+  const call=(n,t,s,big)=>`<a class="sos-call${big?" big":""}" href="tel:${n.replace(/[^\d+]/g,"")}"><span><b>${esc(t)}</b><small>${esc(s)}</small></span><span class="sos-num">${esc(n)}<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M5.5 2.5l2.4 3.8-1.6 1.7a10 10 0 005.7 5.7l1.7-1.6 3.8 2.4-.9 2.6c-.3.8-1.1 1.2-1.9 1.1A15 15 0 012.3 5.3c-.1-.8.3-1.6 1.1-1.9z" fill="currentColor"/></svg></span></a>`;
+  const meet=(()=>{ const id=todayId(); return id&&state.shared.meet&&state.shared.meet[id]?state.shared.meet[id]:""; })();
+  const home=city==="hkt"?HOME_PKT:HOME_BKK;
+  const wrap=el("div",{class:"sos-screen"});
+  wrap.innerHTML=`
+  <header class="sos-head"><h2>Экстренная помощь</h2><p>Нажмите на строку, чтобы позвонить. Звонки работают и с местной, и с российской SIM, но с российской будут дорогими.</p>
+   <div class="seg sos-seg" role="group"><button data-c="bkk" aria-selected="${city==="bkk"}">Бангкок</button><button data-c="hkt" aria-selected="${city==="hkt"}">Пхукет</button></div></header>
+  <section class="sos-block">
+   ${call("1155","Туристическая полиция","говорят по-английски, круглосуточно",true)}
+   ${call("1669","Скорая помощь","государственная",true)}
+   ${call("191","Полиция","все экстренные службы")}
+   ${call("199","Пожарные","")}
+  </section>
+  <section class="sos-block"><h3>${city==="hkt"?"Пхукет":"Бангкок"}: больница и консульство</h3>
+   ${city==="hkt"
+     ? call("+66 76 254 425","Bangkok Hospital Phuket","2/1 Hongyok Utis Rd, круглосуточно")+call("1719","Частная скорая сети Bangkok Hospital","")+call("+66 95 259 8081","Генконсульство России на Пхукете","63/501 Moo 2, Thepkasattri Rd")+call("+66 90 403 3645","Посольство России: дежурный","круглосуточно, для экстренных случаев")
+     : call("+66 2 632 1000","BNH Hospital","9/1 Convent Rd, Силом, рядом с отелем, круглосуточно")+call("+66 90 403 3645","Посольство России: дежурный","для экстренных случаев")+call("+66 2 234 2012","Посольство России: консульский отдел","78 Sap Rd, Банграк")}
+  </section>
+  <section class="sos-block lost"><h3>Я потерялась</h3>
+   <p>Покажите водителю или прохожему адрес на тайском. Если сел телефон — идите в ближайший 7-Eleven или отель и попросите вызвать такси.</p>
+   <div class="lost-addr"><b>${esc(home.th)}</b><span>${esc(home.ru)}</span></div>
+   ${meet?`<div class="lost-meet"><span>Место встречи на сегодня</span><b>${esc(meet)}</b></div>`:""}
+   <div class="sos-acts"><button class="btn primary" id="sosShowHome">Показать крупно</button><button class="btn" id="sosSpeakHome">Озвучить</button></div>
+  </section>
+  <section class="sos-block"><h3>Фразы</h3><div class="phr" id="sosPhr"></div></section>
+  <section class="sos-block steps"><h3>Если потеряли паспорт</h3><ol>
+   <li>Сделайте заявление в полиции, лучше в туристической (1155): нужна справка о потере или краже.</li>
+   <li>Обратитесь в консульский отдел посольства России в Бангкоке или в генконсульство на Пхукете. Для возвращения домой выдают свидетельство на возвращение. Возьмите справку из полиции, фото и копию паспорта из телефона.</li>
+   <li>В консульстве уточните, нужна ли отметка тайской иммиграционной службы перед вылетом.</li>
+   <li>Сообщите авиакомпании и проверьте, примут ли вас на рейс с новым документом.</li></ol></section>
+  <section class="sos-block steps"><h3>Если нужна медицинская помощь</h3><ol>
+   <li>Сначала позвоните в страховую: номер в полисе, полис — в почте. Они скажут, в какую больницу ехать, чтобы лечение оплатили.</li>
+   <li>Если ситуация срочная — звоните 1669 или езжайте в ближайшую больницу на такси, страховую можно известить позже.</li>
+   <li>Сохраняйте все чеки и выписки.</li></ol></section>`;
+  m.appendChild(wrap);
+  wrap.querySelectorAll(".sos-seg button").forEach(x=>x.addEventListener("click",()=>{ sosCity=x.dataset.c; renderSos(); }));
+  wrap.querySelector("#sosShowHome").addEventListener("click",()=>openDriver(home.ru, home.th, home.addr, home.q));
+  wrap.querySelector("#sosSpeakHome").addEventListener("click",e=>speakTh("ไปที่นี่ค่ะ "+home.th, e.currentTarget));
+  const ph=wrap.querySelector("#sosPhr");
+  SOS_PHR.forEach(([ru,th,tr])=>{ const row=el("button",{class:"phr-row"}); row.innerHTML=`<span class="p-ru">${esc(ru)}</span><span class="p-th">${esc(th)}</span><span class="p-tr">${esc(tr)}</span>`;
+    row.addEventListener("click",()=>{ const o=document.getElementById("driver"); o.querySelector(".dr-please").textContent=""; openDriver(ru, th, tr, null); o.querySelector(".dr-map").style.display="none"; });
+    const sp=el("button",{class:"speak","aria-label":"Произнести: "+ru},'<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 8v4h3l4 3.5V4.5L6 8z" fill="currentColor"/><path d="M13 7.2a4 4 0 010 5.6M15.2 5a7 7 0 010 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>');
+    sp.addEventListener("click",()=>speakTh(th,null)); const w=el("div",{class:"phr-item"}); w.append(row,sp); ph.appendChild(w); });
+}
+
 /* ---------- NAV ---------- */
 function fromHash(){
   const h=(location.hash||"").slice(1);
   if(h==="info"){ currentTab="info"; }
   else if(h==="money"){ currentTab="money"; }
+  else if(h==="sos"){ currentTab="sos"; }
   else if(h==="all"){ currentTab="route"; currentDay="all"; }
   else if(h==="search"){ currentTab="search"; }
   else if(DAYS.some(d=>d.id===h)){ currentTab="route"; currentDay=h; }
@@ -1978,11 +2051,11 @@ function fromHash(){
 }
 document.getElementById("tab-route").addEventListener("click",()=>{ currentTab="route"; animDay=true; location.hash=currentDay; render(); });
 document.getElementById("tab-info").addEventListener("click",()=>{ currentTab="info"; animDay=true; location.hash="info"; render(); });
-document.querySelectorAll(".bottombar button").forEach(b=>b.addEventListener("click",()=>{ const t=b.dataset.tab; if(t==="sos"){ document.getElementById("qSos").click(); return; } currentTab=t; animDay=true; location.hash=t==="route"?currentDay:t; render(); window.scrollTo({top:0}); }));
+document.querySelectorAll(".bottombar button").forEach(b=>b.addEventListener("click",()=>{ const t=b.dataset.tab; currentTab=t; animDay=true; location.hash=t==="route"?currentDay:t; render(); window.scrollTo({top:0}); }));
 document.getElementById("tab-money").addEventListener("click",()=>{ currentTab="money"; animDay=true; location.hash="money"; render(); });
 document.getElementById("tab-search").addEventListener("click",()=>{ currentTab="search"; animDay=true; location.hash="search"; render(); });
 document.getElementById("qHome").addEventListener("click",showHome);
-document.getElementById("qSos").addEventListener("click",()=>{ currentTab="info"; location.hash="info"; render(); setTimeout(()=>{const c=document.getElementById("sos"); if(c) c.scrollIntoView({behavior:"smooth",block:"start"});},50); });
+document.getElementById("qSos").addEventListener("click",()=>{ currentTab="sos"; animDay=true; location.hash="sos"; render(); window.scrollTo({top:0}); });
 document.getElementById("drSpeak").addEventListener("click",e=>{ const o=document.getElementById("driver"); speakTh([o.querySelector(".dr-please").textContent,o.querySelector(".dr-th").textContent].filter(Boolean).join(" "), e.currentTarget); });
 document.getElementById("drClose").addEventListener("click",()=>{ const o=document.getElementById("driver"); o.classList.remove("open"); o.querySelector(".dr-please").textContent="ไปที่นี่ค่ะ"; o.querySelector(".dr-map").style.display=""; });
 document.getElementById("driver").addEventListener("click",e=>{ if(e.target.id==="driver") document.getElementById("drClose").click(); });
